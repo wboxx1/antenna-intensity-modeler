@@ -10,6 +10,6 @@ setup(
         numpy >= 1.15.2,
         pandas >= 0.23.4,
         scipy >= 1.1.0,
-	matplotlib >= 3.0.0
+	    matplotlib >= 3.0.0
     ],
 )

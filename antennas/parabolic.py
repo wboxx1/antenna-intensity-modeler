@@ -16,21 +16,25 @@ rad = 1.0
 s = 1.0
 
 
-def parameters(radius, freq, power, efficiency, slr):
-    """
-    Set parameters for parabolic dish
-        inputs:
-                radius - antenna radius in meters
-                freq - frequency in hertz
-                power - output power of radio in watts
-                efficiency - efficiency of antenna
-                slr - side lobe ratio of antenna
+def parameters(radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio):
+    """Parameters for parabolic dish
 
-        output:
-            none
+    Receives user input parameters for parabolic dish and 
+    computes and returns all needed parameters for parabolic
+    functions.
+
+    Args:
+        radius_meters(float): antenna radius in meters.
+        freq_MHz(float): frequency in hertz.
+        power_watts(float): output power of radio in watts.
+        efficiency(float): efficiency of antenna.
+        side_lobe_ratio(float): side lobe ratio of antenna.
+
+    Returns:
+        parameters(tuple): parameters needed for parabolic functions.
     """
 
-    """ Constants """
+    """Constants"""
     C = 3e8 * m / s
 
     # Sidelobe Ratios (illummination)
@@ -50,22 +54,36 @@ def parameters(radius, freq, power, efficiency, slr):
         45: 1.9681,
         50: 2.2026
     }
-    DIAM = 2 * radius
-    LAMDA = C / freq
+    DIAM = 2 * radius_meters
+    LAMDA = C / freq_mhz
     GAIN = 10 * np.log10(efficiency * (pi * DIAM / LAMDA)**2)
-    EIRP = power * 10**(0.1 * GAIN)
+    EIRP = power_watts * 10**(0.1 * GAIN)
 
-    """ Properties """
-    H = HDICT[slr]
+    """Properties"""
+    H = HDICT[side_lobe_ratio]
     ffmin = 2 * DIAM**2 / LAMDA
     ffpwrden = EIRP / (4 * pi * ffmin**2)
     k = 2 * pi / LAMDA
 
-    return radius, freq, power, efficiency, slr, H, ffmin, ffpwrden, k
+    return radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k
 
 
 def near_field_corrections(parameters, xbar):
-    radius, freq, power, efficiency, slr, H, ffmin, ffpwrden, k = parameters
+    """Near field corrections for parabolic dish.
+
+    Receives user input parameters and normalized off axis distance
+    for parabolic dish computes and returns plot of near field correction
+    factors.
+
+    Args:
+        parameters(tuple): parameters tuple created with parameters function
+        xbar(float): normalized off-axis distance
+
+    Returns:
+        fig: figure
+        ax: axes
+    """
+    radius, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k = parameters
 
     delta = np.linspace(0.01, 1.0, 1000)  # Normalized farfield distances
     Ep = np.zeros(1000)
@@ -95,16 +113,30 @@ def near_field_corrections(parameters, xbar):
     fig, ax = plt.subplots()
     ax.semilogx(delta, Pcorr)
     ax.set_xlim([0.01, 1.0])
-    ax.grid(True, which='both')
+    ax.grid(True, which="both")
     ax.minorticks_on()
-    ax.set_title("Near Field Corrections xbar: %s , slr: %s" % (xbar, slr))
+    ax.set_title("Near Field Corrections xbar: %s , slr: %s" % (xbar, side_lobe_ratio))
     ax.set_xlabel("Normalized On Axis Distance")
     ax.set_ylabel("Normalized On Axis Power Density")
     return fig, ax
 
 
 def hazard_plot(parameters, limit):
-    radius, freq, power, efficiency, slr, H, ffmin, ffpwrden, k = parameters
+    """Hazard plot for parabolic dish.
+
+    Receives user input parameters and hazard limit
+    for parabolic dish. Computes and returns hazard distance
+    plot.
+
+    Args:
+        parameters(tuple): parameters tuple created with parameters function
+        limit(float): power density limit
+
+    Returns:
+        fig: figure
+        ax: axes
+    """
+    radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k = parameters
     n = 1000
     delta = np.linspace(1.0, 0.01, n)  # Normalized farfield distances
     xbarArray = np.ones(n)
@@ -115,9 +147,9 @@ def hazard_plot(parameters, limit):
     count = 0
     for d in delta:
         for xbar in xbars:
-            xbarR = xbar * radius
+            xbarR = xbar * radius_meters
             theta = np.arctan(xbarR / (d * ffmin))
-            u = k * radius * np.sin(theta)
+            u = k * radius_meters * np.sin(theta)
             fun1 = lambda x: (sp.special.iv(0, pi * H * (1 - x**2))
                               * sp.special.jv(0, u * x)
                               * np.cos(pi * x**2 / 8 / d)
@@ -138,8 +170,8 @@ def hazard_plot(parameters, limit):
         count += 1
 
     fig, ax = plt.subplots()
-    ax.plot(delta[::-1] * ffmin, xbarArray[::-1] * radius,
-            delta[::-1] * ffmin, xbarArray[::-1] * -radius)
+    ax.plot(delta[::-1] * ffmin, xbarArray[::-1] * radius_meters,
+            delta[::-1] * ffmin, xbarArray[::-1] * -radius_meters)
     ax.grid(True, which='both')
     ax.minorticks_on()
     ax.set_title('Hazard Plot with limit: %s w/m^2' % limit)
@@ -149,10 +181,18 @@ def hazard_plot(parameters, limit):
 
 
 def print_parameters(parameters):
-    radius, freq, power, efficiency, slr, H, ffmin, ffpwrden, k = parameters
-    print('Aperture Radius: %.2f' % radius)
-    print('Output Power (w): %.2f' % power)
+    """Prints formated parameter list.
+
+    Args:
+        parameters(tuple): parameters tuple created with parameters function
+
+    Returns:
+        none
+    """
+    radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k = parameters
+    print('Aperture Radius: %.2f' % radius_meters)
+    print('Output Power (w): %.2f' % power_watts)
     print('Antenna Efficiency: %.2f' % efficiency)
-    print('Side Lobe Ratio: %.2f' % slr)
+    print('Side Lobe Ratio: %.2f' % side_lobe_ratio)
     print('Far Field (m): %.2f' % ffmin)
     print('Far Field (w/m^2): %.2f' % ffpwrden)

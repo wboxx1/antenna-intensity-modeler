@@ -12,7 +12,6 @@ GH_PAGES_SOURCES = ../docs Makefile
 gh-pages:
 	git checkout gh-pages
 	rm -rf build _sources _static
-	cd ..
 	git checkout master $(GH_PAGES_SOURCES)
 	git reset HEAD
 	make html

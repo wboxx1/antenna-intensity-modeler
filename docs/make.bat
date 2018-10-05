@@ -35,13 +35,13 @@ goto end
 
 :ghpages
 git checkout gh-pages &&^
-del /f /q ..\_modules ..\_sources ..\_static ..\antennas
-git checkout master source make.bat ..\antennas ^
-git reset HEAD ^
+del /S /F /Q ..\_modules ..\_sources ..\_static ..\antennas
+git checkout master source make.bat ..\antennas &&^
+git reset HEAD &&^
 make  html
-move /y build\html\* ..\
-del /s /f /q source make.bat ..\antennas
-git add -A ^
+move /Y build\html\* ..\
+del /S /F /Q source make.bat ..\antennas
+git add -A &&^
 call git commit -m "Generated gh-pages for `git log master -1 --pretty=short --abbrev-commit`" && git push origin gh-pages ; git checkout master
 
 :end

@@ -34,7 +34,7 @@ goto end
 %SPHINXBUILD% -M help %SOURCEDIR% %BUILDDIR% %SPHINXOPTS%
 
 :ghpages
-call git checkout gh-pages
+git.exe checkout gh-pages
 del /s /f /q ..\_modules ..\_sources ..\_static ..\antennas
 call git checkout master source make.bat ..\antennas
 call git reset HEAD

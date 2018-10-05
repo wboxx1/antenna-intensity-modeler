@@ -34,14 +34,14 @@ goto end
 %SPHINXBUILD% -M help %SOURCEDIR% %BUILDDIR% %SPHINXOPTS%
 
 :ghpages
-git.exe checkout gh-pages
+call git checkout gh-pages^
 del /s /f /q ..\_modules ..\_sources ..\_static ..\antennas
-call git checkout master source make.bat ..\antennas
-call git reset HEAD
+call git checkout master source make.bat ..\antennas^
+call git reset HEAD^
 make  html
 move /y build\html\* ..\
 del /s /f /q source make.bat ..\antennas
-call git add -A
+call git add -A^
 call git commit -m "Generated gh-pages for `git log master -1 --pretty=short --abbrev-commit`" && git push origin gh-pages ; git checkout master
 
 :end

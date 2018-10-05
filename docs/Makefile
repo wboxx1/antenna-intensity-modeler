@@ -7,11 +7,11 @@ SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = AntennaIntensityModeler
 SOURCEDIR     = source
 BUILDDIR      = build
-GH_PAGES_SOURCES = source Makefile
+GH_PAGES_SOURCES = source Makefile ../antennas
 
 gh-pages:
 	git checkout gh-pages
-	rm -rf _modules _sources _static
+	rm -rf _modules _sources _static ../antennas
 	git checkout master $(GH_PAGES_SOURCES)
 	git reset HEAD
 	make  html

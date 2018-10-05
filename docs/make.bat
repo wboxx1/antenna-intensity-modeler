@@ -43,7 +43,7 @@ move /Y build\html\* ..\ &&^
 del /S /F /Q source make.bat ..\antennas &&^
 git add -A &&^
 set NAME = git log master -1 --pretty=short --abbrev-commit &&^
-git commit -m "Generated gh-pages for "%NAME%"" &&^
+git commit -m "Generated gh-pages for %NAME%" &&^
 git push origin gh-pages &&^
 git checkout master
 

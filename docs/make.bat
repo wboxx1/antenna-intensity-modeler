@@ -42,7 +42,7 @@ make  html &&^
 move /Y build\html\* ..\ &&^
 del /S /F /Q source make.bat ..\antennas &&^
 git add -A &&^
-call git commit -m "Generate gh-pages for `git log master -1 --pretty=short --abbrev-commit`" &&^
+call git commit -m "Generate gh-pages for 'git log master -1 --pretty=short --abbrev-commit'" &&^
 git push origin gh-pages &&^
 git checkout master
 

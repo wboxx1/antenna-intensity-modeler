@@ -44,7 +44,7 @@ del /S /F /Q source make.bat ..\antennas &&^
 git add -A &&^
 set COMMIT = git log master -1 --pretty=short --abbrev-commit &&^
 set NAME = "Generate gh-pages for " + %COMMIT% &&^
-ECHO NAME &&^
+ECHO %NAME% &&^
 git commit -m %NAME% &&^
 git push origin gh-pages &&^
 git checkout master

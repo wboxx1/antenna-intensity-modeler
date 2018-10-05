@@ -23,3 +23,4 @@ Content
 =======
 
 .. autofunction:: parabolic.parameters
+.. autofunction:: parabolic.near_field_corrections

@@ -35,7 +35,7 @@ goto end
 
 :ghpages
 call git checkout gh-pages^
-del /s /f /q ..\_modules ..\_sources ..\_static ..\antennas
+del /f /q ..\_modules ..\_sources ..\_static ..\antennas
 call git checkout master source make.bat ..\antennas^
 call git reset HEAD^
 make  html

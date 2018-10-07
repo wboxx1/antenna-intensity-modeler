@@ -6,7 +6,7 @@ SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = AntennaIntensityModeler
 SOURCEDIR     = source
-BUILDDIR      = build
+BUILDDIR      = _build
 GH_PAGES_SOURCES = source Makefile ../antennas
 
 gh-pages:

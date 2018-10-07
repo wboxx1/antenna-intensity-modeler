@@ -24,15 +24,24 @@ def parameters(radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio
     computes and returns all needed parameters for parabolic
     functions.
 
-    Args:
-        radius_meters(float): antenna radius in meters.
-        freq_MHz(float): frequency in hertz.
-        power_watts(float): output power of radio in watts.
-        efficiency(float): efficiency of antenna.
-        side_lobe_ratio(float): side lobe ratio of antenna.
+    :param radius_meters: antenna radius in meters.
+    :param freq_mhz: frequency in hertz.
+    :param power_watts: output power of radio in watts.
+    :param efficiency: efficiency of antenna.
+    :param side_lobe_ratio: side lobe ratio of antenna.
+    :type radius_meters: float
+    :type freq_mhz: float
+    :type power_watts: float
+    :type efficiency: float
+    :type side_lobe_ratio: float
+    :returns: parameters needed for parabolic functions.
+    :rtype tuple(float)
+    :Example:
 
-    Returns:
-        parameters(tuple): parameters needed for parabolic functions.
+    >>> import parabolic
+    >>> params = parabolic.parameters(2.4, 8.4e9, 400, 0.62, 20)
+    >>> params
+    (2.4, 8.4e9, 400, 0.62, 20, 0.4872, 1290.24, 2.1134, 175.929)
     """
 
     """Constants"""

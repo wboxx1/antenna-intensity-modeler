@@ -39,7 +39,7 @@ def parameters(radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio
     :Example:
 
     >>> import parabolic
-    >>> params = parabolic.parameters(2.4, 8.4e9, 400, 0.62, 20)
+    >>> params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
     >>> params
     (2.4, 8.4e9, 400, 0.62, 20, 0.4872, 1290.24, 2.1134, 175.929)
     """
@@ -94,8 +94,8 @@ def near_field_corrections(parameters, xbar):
     :Example:
     
     >>> import parabolic
-    >>> params = parabolic.parameters(2.4, 8.4e9, 400, 0.62, 20)
-    >>> fig, ax = parabolic.near_field_corrections(params, 1)
+    >>> params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
+    >>> fig, ax = parabolic.near_field_corrections(params, 1.0)
     """
     radius, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k = parameters
 
@@ -142,13 +142,17 @@ def hazard_plot(parameters, limit):
     for parabolic dish. Computes and returns hazard distance
     plot.
 
-    Args:
-        parameters(tuple): parameters tuple created with parameters function
-        limit(float): power density limit
+    :param parameters: parameters tuple created with parameters function
+    :param limit: power density limit
+    :type parameters: tuple(float)
+    :type limit: float
+    :returns: figure and axes for hazard plot
+    :rtype: (figure, axes)
+    :Example:
 
-    Returns:
-        fig: figure
-        ax: axes
+    >>> import parabolic
+    >>> params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
+    >>> fig, ax = hazard_plot(params, 10.0)
     """
     radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k = parameters
     n = 1000

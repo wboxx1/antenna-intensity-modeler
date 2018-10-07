@@ -35,7 +35,7 @@ def parameters(radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio
     :type efficiency: float
     :type side_lobe_ratio: float
     :returns: parameters needed for parabolic functions.
-    :rtype tuple(float)
+    :rtype: tuple(float)
     :Example:
 
     >>> import parabolic
@@ -85,13 +85,17 @@ def near_field_corrections(parameters, xbar):
     for parabolic dish computes and returns plot of near field correction
     factors.
 
-    Args:
-        parameters(tuple): parameters tuple created with parameters function
-        xbar(float): normalized off-axis distance
-
-    Returns:
-        fig: figure
-        ax: axes
+    :param parameters: parameters tuple created with parameters function
+    :param xbar: normalized off-axis distance
+    :type parameters: tuple(float)
+    :type xbar: float
+    :returns: figure and axes for plot
+    :rtype: (figure, axes)
+    :Example:
+    
+    >>> import parabolic
+    >>> params = parabolic.parameters(2.4, 8.4e9, 400, 0.62, 20)
+    >>> fig, ax = parabolic.near_field_corrections(params, 1)
     """
     radius, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k = parameters
 

@@ -8,9 +8,9 @@ Welcome to Antenna Intensity Modeler's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
-
+   quickstart
+   modules
 
 Indices and tables
 ==================
@@ -18,10 +18,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-Content
-=======
-
-.. autofunction:: parabolic.parameters
-.. autofunction:: parabolic.near_field_corrections
-.. autofunction:: parabolic.hazard_plot

@@ -88,7 +88,14 @@ html_theme = 'nature'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    'github_user': 'wboxx1',
+    'github_repo': 'sphinx-restructuredtext-example',
+    'github_button': 'true',
+    'font_family': 'Roboto, serif',
+    'caption_font_family': 'Roboto, serif',
+    'head_font_family': 'Roboto, serif',
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -104,7 +111,9 @@ html_static_path = ['_static']
 # 'searchbox.html']``.
 #
 # html_sidebars = {}
-
+html_sidebars = {
+    '**': ['globaltoc.html', 'relations.html', 'sourcelink.html', 'searchbox.html'],
+}
 
 # -- Options for HTMLHelp output ---------------------------------------------
 

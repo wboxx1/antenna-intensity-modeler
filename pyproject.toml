@@ -8,7 +8,7 @@ license = "GPL-3.0"
 readme = "README.rst"
 
 repository = "https://github.com/wboxx1/antenna-intensity-modeler"
-homepage = "https://wboxx1.github.io/antenna-intensity-modeler/build/html/index.html"
+homepage = "https://wboxx1.github.io/antenna-intensity-modeler/"
 
 packages = [
     { include = "antenna_intensity_modeler", from = "src"},

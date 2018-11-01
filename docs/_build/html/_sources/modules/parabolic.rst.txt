@@ -1,4 +1,0 @@
-Parabolic
-=========
-.. automodule:: parabolic
-    :members:

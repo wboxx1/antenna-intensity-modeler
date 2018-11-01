@@ -18,7 +18,7 @@
 
 import os
 import sys
-sys.path.insert(0,os.path.abspath('../../antennas'))
+sys.path.insert(0,os.path.abspath('../../src/antenna_intensity_modeler'))
 
 # -- Project information -----------------------------------------------------
 
@@ -47,6 +47,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
+    'sphinx.ext.imgmath',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

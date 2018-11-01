@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "antenna-intensity-modeler"
+version = "0.1.0"
+description = "Creates near-field intensity plots for parabolic dish antennas."
+authors = ["Will Boxx <wboxx1@gmail.com>"]
+license = "GPL-3.0"
+
+readme = "README.rst"
+
+repository = "https://github.com/wboxx1/antenna-intensity-modeler"
+homepage = "https://wboxx1.github.io/antenna-intensity-modeler/build/html/index.html"
+
+packages = [
+    { include = "antenna_intensity_modeler", from = "src"},
+]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+numpy = "^1.15"
+scipy = "^1.1"
+matplotlib = "^3.0"
+
+[tool.poetry.dev-dependencies]
+unittest = "^0.0.0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

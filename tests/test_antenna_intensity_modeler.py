@@ -14,7 +14,7 @@ def test_all():
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
     # add tests to the test suite
-    suite.addTests(loader.discover(start_dir='.', pattern='*tests.py'))
+    suite.addTests(loader.discover(start_dir='./src/', pattern='*tests.py'))
     runner = unittest.TextTestRunner(verbosity=3)
     runner.run(suite)
 

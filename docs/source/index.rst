@@ -6,9 +6,13 @@
 Welcome to Antenna Intensity Modeler's documentation!
 =====================================================
 
+This python package will calculate the near and far field intensities for
+parabolic and rectangular aperture antennas. 
+
 .. toctree::
    :maxdepth: 2
 
+   method
    quickstart
    modules
 

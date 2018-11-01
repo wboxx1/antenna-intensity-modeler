@@ -8,6 +8,7 @@ Created on Wed Aug 22 17:05:12 2018
 import numpy as np
 import scipy as sp
 import scipy.integrate
+import scipy.special
 import matplotlib.pyplot as plt
 
 # Units
@@ -108,14 +109,14 @@ def near_field_corrections(parameters, xbar):
         theta = np.arctan(xbarR / (d * ffmin))
         u = k * radius * np.sin(theta)
 
-        fun1 = lambda x: (sp.special.iv(0, pi * H * (1 - x**2))
-                          * sp.special.jv(0, u * x)
+        fun1 = lambda x: (scipy.special.iv(0, pi * H * (1 - x**2))
+                          * scipy.special.jv(0, u * x)
                           * np.cos(pi * x**2 / 8 / d)
                           * x)
         Ep1 = scipy.integrate.romberg(fun1, 0, 1)
 
-        fun2 = lambda x: (sp.special.iv(0, pi * H * (1 - x**2))
-                          * sp.special.jv(0, u * x)
+        fun2 = lambda x: (scipy.special.iv(0, pi * H * (1 - x**2))
+                          * scipy.special.jv(0, u * x)
                           * np.sin(pi * x**2 / 8 / d)
                           * x)
         Ep2 = scipy.integrate.romberg(fun2, 0, 1)

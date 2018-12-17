@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Aug 22 17:05:12 2018
 
-@author: wboxx
-"""
+"""Main module."""
 
 import numpy as np
 import scipy as sp
 import scipy.integrate
 import scipy.special
 import matplotlib.pyplot as plt
+import pandas as pd
 
 # Units
 m = 1.0
@@ -39,7 +37,7 @@ def parameters(radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio
     :rtype: tuple(float)
     :Example:
 
-    >>> import parabolic
+    >>> from antenna_intensity_modeler import parabolic
     >>> params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
     >>> params
     (2.4, 8.4e9, 400, 0.62, 20, 0.4872, 1290.24, 2.1134, 175.929)
@@ -90,13 +88,25 @@ def near_field_corrections(parameters, xbar):
     :param xbar: normalized off-axis distance
     :type parameters: tuple(float)
     :type xbar: float
-    :returns: figure and axes for plot
-    :rtype: (figure, axes)
+    :returns: dataframe
+    :rtype: pandas dataframe
     :Example:
     
-    >>> import parabolic
+    >>> from antenna_intensity_modeler import parabolic
+    >>> import matplotlib.pyplot as plt
     >>> params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
-    >>> fig, ax = parabolic.near_field_corrections(params, 1.0)
+    >>> xbar = 1.0
+    >>> table = parabolic.near_field_corrections(params, xbar)
+    >>> fig, ax = plt.subplots()
+    >>> ax.semilogx(table.delta, table.Pcorr)
+    >>> ax.set_xlim([0.01, 1.0])
+    >>> ax.grid(True, which="both")
+    >>> ax.minorticks_on()
+    >>> side_lobe_ratio = params[4]
+    >>> ax.set_title("Near Field Corrections xbar: %s , slr: %s" % (xbar, side_lobe_ratio))
+    >>> ax.set_xlabel("Normalized On Axis Distance")
+    >>> ax.set_ylabel("Normalized On Axis Power Density")
+    >>> fig.show()
     """
     radius, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k = parameters
 
@@ -125,15 +135,16 @@ def near_field_corrections(parameters, xbar):
 
     Pcorr = (Ep**2 / Ep[-1]**2) * ffpwrden
 
-    fig, ax = plt.subplots()
-    ax.semilogx(delta, Pcorr)
-    ax.set_xlim([0.01, 1.0])
-    ax.grid(True, which="both")
-    ax.minorticks_on()
-    ax.set_title("Near Field Corrections xbar: %s , slr: %s" % (xbar, side_lobe_ratio))
-    ax.set_xlabel("Normalized On Axis Distance")
-    ax.set_ylabel("Normalized On Axis Power Density")
-    return fig, ax
+    #fig, ax = plt.subplots()
+    #ax.semilogx(delta, Pcorr)
+    #ax.set_xlim([0.01, 1.0])
+    #ax.grid(True, which="both")
+    #ax.minorticks_on()
+    #ax.set_title("Near Field Corrections xbar: %s , slr: %s" % (xbar, side_lobe_ratio))
+    #ax.set_xlabel("Normalized On Axis Distance")
+    #ax.set_ylabel("Normalized On Axis Power Density")
+    #return fig, ax
+    return pd.DataFrame(dict(delta=delta, Pcorr=Pcorr))
 
 
 def hazard_plot(parameters, limit):
@@ -151,7 +162,7 @@ def hazard_plot(parameters, limit):
     :rtype: (figure, axes)
     :Example:
 
-    >>> import parabolic
+    >>> from antenna_intensity_modeler import parabolic
     >>> params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
     >>> fig, ax = hazard_plot(params, 10.0)
     """

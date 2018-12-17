@@ -6,16 +6,6 @@ environment:
     secure: <ENTER ENCRYPTED PIPY_PASS KEY>
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PYTHON: "C:\\Python27"
-      TOX_ENV: "py27"
-      DEPLOY: "false"
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      PYTHON: "C:\\Python27-x64"
-      TOX_ENV: "py27"
-      DEPLOY: "false"
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       PYTHON: "C:\\Python34"
       TOX_ENV: "py34"
       DEPLOY: "false"

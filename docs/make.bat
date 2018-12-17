@@ -5,22 +5,21 @@ pushd %~dp0
 REM Command file for Sphinx documentation
 
 if "%SPHINXBUILD%" == "" (
-	set SPHINXBUILD=sphinx-build
+	set SPHINXBUILD=python -msphinx
 )
-set SOURCEDIR=source
-set BUILDDIR=build
-set SPHINXPROJ=AntennaIntensityModeler
+set SOURCEDIR=.
+set BUILDDIR=_build
+set SPHINXPROJ=antenna_intensity_modeler
 
 if "%1" == "" goto help
-if "%1" == "gh-pages" goto ghpages
 
 %SPHINXBUILD% >NUL 2>NUL
 if errorlevel 9009 (
 	echo.
-	echo.The 'sphinx-build' command was not found. Make sure you have Sphinx
-	echo.installed, then set the SPHINXBUILD environment variable to point
-	echo.to the full path of the 'sphinx-build' executable. Alternatively you
-	echo.may add the Sphinx directory to PATH.
+	echo.The Sphinx module was not found. Make sure you have Sphinx installed,
+	echo.then set the SPHINXBUILD environment variable to point to the full
+	echo.path of the 'sphinx-build' executable. Alternatively you may add the
+	echo.Sphinx directory to PATH.
 	echo.
 	echo.If you don't have Sphinx installed, grab it from
 	echo.http://sphinx-doc.org/
@@ -32,19 +31,6 @@ goto end
 
 :help
 %SPHINXBUILD% -M help %SOURCEDIR% %BUILDDIR% %SPHINXOPTS%
-
-:ghpages
-git checkout gh-pages &&^
-del /S /F /Q ..\_modules ..\_sources ..\_static ..\antennas &&^
-git checkout master source make.bat ..\antennas &&^
-git reset HEAD &&^
-make  html &&^
-move /Y build\html\* ..\ &&^
-del /S /F /Q source make.bat ..\antennas &&^
-git add -A &&^
-git commit -m "Generate gh-pages" &&^
-git push origin gh-pages &&^
-git checkout master
 
 :end
 popd

@@ -3,22 +3,10 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
-SPHINXBUILD   = sphinx-build
-SPHINXPROJ    = AntennaIntensityModeler
-SOURCEDIR     = source
-BUILDDIR      = build
-GH_PAGES_SOURCES = source Makefile ../antennas
-
-gh-pages:
-	git checkout gh-pages
-	rm -rf ../_modules ../_source ../_static ../antennas
-	rm -rf $(GH_PAGES_SOURCES)
-	git checkout master $(GH_PAGES_SOURCES)
-	git reset HEAD
-	make  html
-	mv -fv build/html/* ../
-	git add -A
-	git commit -m "Generated gh-pages for `git log master -1 --pretty=short --abbrev-commit`" && git push origin gh-pages ; git checkout master
+SPHINXBUILD   = python -msphinx
+SPHINXPROJ    = antenna_intensity_modeler
+SOURCEDIR     = .
+BUILDDIR      = _build
 
 # Put it first so that "make" without argument is like "make help".
 help:

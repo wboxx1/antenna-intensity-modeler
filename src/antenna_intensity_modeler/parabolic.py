@@ -19,7 +19,7 @@ s = 1.0
 def parameters(radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio):
     """Parameters for parabolic dish
 
-    Receives user input parameters for parabolic dish and 
+    Receives user input parameters for parabolic dish and
     computes and returns all needed parameters for parabolic
     functions.
 
@@ -91,7 +91,7 @@ def near_field_corrections(parameters, xbar):
     :returns: dataframe
     :rtype: pandas dataframe
     :Example:
-    
+
     >>> from antenna_intensity_modeler import parabolic
     >>> import matplotlib.pyplot as plt
     >>> params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)

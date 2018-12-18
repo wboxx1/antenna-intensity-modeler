@@ -107,6 +107,8 @@ def near_field_corrections(parameters, xbar):
     >>> ax.set_xlabel("Normalized On Axis Distance")
     >>> ax.set_ylabel("Normalized On Axis Power Density")
     >>> fig.show()
+
+    .. image:: _static/nfcImage.png
     """
     radius, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k = parameters
 

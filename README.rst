@@ -10,13 +10,8 @@ antenna-intensity-modeler
         :target: https://travis-ci.org/wboxx1/antenna-intensity-modeler
 
 .. image:: https://ci.appveyor.com/api/projects/status/wboxx1/branch/master?svg=true
-    :target: https://ci.appveyor.com/project/wboxx1/antenna-intensity-modeler/branch/master
+    :target: https://ci.appveyor.com/api/projects/status/a9phai3m3pxjwtt5?svg=true
     :alt: Build status on Appveyor
-
-.. image:: https://readthedocs.org/projects/antenna-intensity-modeler/badge/?version=latest
-        :target: https://antenna-intensity-modeler.readthedocs.io/en/latest/?badge=latest
-        :alt: Documentation Status
-
 
 .. image:: https://pyup.io/repos/github/wboxx1/antenna-intensity-modeler/shield.svg
      :target: https://pyup.io/repos/github/wboxx1/antenna-intensity-modeler/

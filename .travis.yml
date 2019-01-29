@@ -4,7 +4,6 @@ language: python
 python:
   - 3.6
   - 3.5
-  - 3.4
 
 env:
   global:
@@ -28,11 +27,11 @@ before-deploy:
 - poetry config http-basic.mypypi wboxx1 $TRAVIS_PASS
 - poetry build
 
-deploy:
-  provider: script
-  script: poetry publish
-  on:
-    tags: true
-    repo: wboxx1/antenna-intensity-modeler
-    branch: master
-    python: 3.6
+#deploy:
+#  provider: script
+#  script: poetry publish
+#  on:
+#    tags: true
+#    repo: wboxx1/antenna-intensity-modeler
+#    branch: master
+#    python: 3.6

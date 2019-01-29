@@ -53,7 +53,7 @@ def test_near_field_corrections_function():
     params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
     table = parabolic.near_field_corrections(params, 1.0)
     np.testing.assert_allclose(
-        [table.sum()[0], table.sum()[1]],
+        [table.delta.sum(), table.Pcorr.sum()],
         [505, 3715],
         rtol=1
     )

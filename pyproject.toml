@@ -27,7 +27,7 @@ classifiers = [
 ]
 [tool.poetry.dependencies]
 # List project dependencies here
-python = "^3.5"
+python = "^3.4"
 numpy = "^1.15"
 pandas = "^0.23"
 scipy = "^1.1"

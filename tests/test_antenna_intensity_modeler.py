@@ -54,7 +54,7 @@ def test_near_field_corrections_function():
     table = parabolic.near_field_corrections(params, 1.0)
     np.testing.assert_allclose(
         [table.sum()[0], table.sum()[1]],
-        [3715, 505],
+        [505, 3715],
         rtol=1
     )
 

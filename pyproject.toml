@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "antenna-intensity-modeler"
-version = "0.1.0"
+version = "0.1.1"
 description = "Create near-field plots of parabolic dish antennas."
 authors = ["Will Boxx <wboxx1@gmail.com>"]
 license = "GNU General Public License v3"

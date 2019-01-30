@@ -7,7 +7,8 @@ antenna-intensity-modeler
         :target: https://pypi.python.org/pypi/antenna_intensity_modeler
 
 .. image:: https://img.shields.io/travis/wboxx1/antenna-intensity-modeler.svg
-        :target: https://travis-ci.org/wboxx1/antenna-intensity-modeler
+        :target: https://travis-ci.com/wboxx1/antenna-intensity-modeler.svg?branch=master
+        :alt: Build status on travis-ci
 
 .. image:: https://ci.appveyor.com/api/projects/status/wboxx1/branch/master?svg=true
     :target: https://ci.appveyor.com/api/projects/status/a9phai3m3pxjwtt5?svg=true

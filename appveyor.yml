@@ -24,16 +24,6 @@ environment:
       PYTHON: "C:\\Python36-x64"
       TOX_ENV: "py36"
       DEPLOY: "false"
-      
-    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-      PYTHON: "2.7"
-      TOX_ENV: "py27"
-      DEPLOY: "false"
-
-    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-      PYTHON: "3.4"
-      TOX_ENV: "py34"
-      DEPLOY: "false"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
       PYTHON: "3.5"

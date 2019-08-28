@@ -150,7 +150,7 @@ def near_field_corrections(parameters, xbar):
     return pd.DataFrame(dict(delta=delta, Pcorr=Pcorr))
 
 
-def hazard_plot(parameters, limit, xbar_max=1, gain_boost=None):
+def hazard_plot(parameters, limit, density=1000, xbar_max=1, gain_boost=None):
     """Hazard plot for parabolic dish.
 
     Receives user input parameters and hazard limit
@@ -159,6 +159,7 @@ def hazard_plot(parameters, limit, xbar_max=1, gain_boost=None):
 
     :param parameters: parameters tuple created with parameters function
     :param limit: power density limit
+    :param density: (optional) number of points for plot, if none density=1000
     :param xbar_max: (optional) maximum value for xbar, if none is given xbar_max=1
     :param gain_boost: (optional) additional numerical gain to add
     :type parameters: tuple(float)
@@ -174,10 +175,10 @@ def hazard_plot(parameters, limit, xbar_max=1, gain_boost=None):
     >>> fig, ax = hazard_plot(params, 10.0)
     """
     radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k = parameters
-    n = 1000
+    n = density
     delta = np.linspace(1.0, 0.01, n)  # Normalized farfield distances
     xbarArray = np.ones(n)
-    Ep = np.zeros(1000)
+    Ep = np.zeros(n)
 
     # xbars = np.linspace(0, 1, 10)
     xbars = np.arange(0, xbar_max + 0.1, 0.1)

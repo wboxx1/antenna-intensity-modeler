@@ -26,9 +26,11 @@ matrix:
       before_install:
         - choco install python3 -version 3.5.4  # this install takes at least 1 min 30 sec
         - python -m pip install --upgrade pip
+      before_script:
+        - poetry install
       env: 
         - PATH=/c/Python35:/c/Python35/Scripts:$PATH;
-        - TEST="%PYTHON%/Scripts/tox -e %TOX_ENV%"
+        - TEST="poetry run pytest --cov=src/antenna_intensity_modeler tests/"
 
 env:
   global:

@@ -122,16 +122,16 @@ def near_field_corrections(parameters, xbar):
         theta = np.arctan(xbarR / (d * ffmin))
         u = k * radius * np.sin(theta)
 
-        fun1 = lambda x: (scipy.special.iv(0, pi * H * (1 - x**2))
-                          * scipy.special.jv(0, u * x)
-                          * np.cos(pi * x**2 / 8 / d)
-                          * x)
+        def fun1(x): return (scipy.special.iv(0, pi * H * (1 - x**2))
+                             * scipy.special.jv(0, u * x)
+                             * np.cos(pi * x**2 / 8 / d)
+                             * x)
         Ep1 = scipy.integrate.romberg(fun1, 0, 1)
 
-        fun2 = lambda x: (scipy.special.iv(0, pi * H * (1 - x**2))
-                          * scipy.special.jv(0, u * x)
-                          * np.sin(pi * x**2 / 8 / d)
-                          * x)
+        def fun2(x): return (scipy.special.iv(0, pi * H * (1 - x**2))
+                             * scipy.special.jv(0, u * x)
+                             * np.sin(pi * x**2 / 8 / d)
+                             * x)
         Ep2 = scipy.integrate.romberg(fun2, 0, 1)
         Ep[count] = (1 + np.cos(theta)) / d * abs(Ep1 - 1j * Ep2)
         count += 1
@@ -142,15 +142,15 @@ def near_field_corrections(parameters, xbar):
     #ax.semilogx(delta, Pcorr)
     #ax.set_xlim([0.01, 1.0])
     #ax.grid(True, which="both")
-    #ax.minorticks_on()
+    # ax.minorticks_on()
     #ax.set_title("Near Field Corrections xbar: %s , slr: %s" % (xbar, side_lobe_ratio))
     #ax.set_xlabel("Normalized On Axis Distance")
     #ax.set_ylabel("Normalized On Axis Power Density")
-    #return fig, ax
+    # return fig, ax
     return pd.DataFrame(dict(delta=delta, Pcorr=Pcorr))
 
 
-def hazard_plot(parameters, limit):
+def hazard_plot(parameters, limit, xbar_max=1, gain_boost=None):
     """Hazard plot for parabolic dish.
 
     Receives user input parameters and hazard limit
@@ -159,8 +159,12 @@ def hazard_plot(parameters, limit):
 
     :param parameters: parameters tuple created with parameters function
     :param limit: power density limit
+    :param xbar_max: (optional) maximum value for xbar, if none is given xbar_max=1
+    :param gain_boost: (optional) additional numerical gain to add
     :type parameters: tuple(float)
     :type limit: float
+    :type xbar_max: int
+    :type gain_boost: float
     :returns: figure and axes for hazard plot
     :rtype: (figure, axes)
     :Example:
@@ -173,8 +177,13 @@ def hazard_plot(parameters, limit):
     n = 1000
     delta = np.linspace(1.0, 0.01, n)  # Normalized farfield distances
     xbarArray = np.ones(n)
-    xbars = np.linspace(0, 1, 10)
     Ep = np.zeros(1000)
+
+    # xbars = np.linspace(0, 1, 10)
+    xbars = np.arange(0, xbar_max + 0.1, 0.1)
+
+    if gain_boost is not None:
+        ffpwrden = gain_boost*ffpwrden
 
     last = 999
     count = 0
@@ -183,15 +192,17 @@ def hazard_plot(parameters, limit):
             xbarR = xbar * radius_meters
             theta = np.arctan(xbarR / (d * ffmin))
             u = k * radius_meters * np.sin(theta)
-            fun1 = lambda x: (sp.special.iv(0, pi * H * (1 - x**2))
-                              * sp.special.jv(0, u * x)
-                              * np.cos(pi * x**2 / 8 / d)
-                              * x)
+
+            def fun1(x): return (sp.special.iv(0, pi * H * (1 - x**2))
+                                 * sp.special.jv(0, u * x)
+                                 * np.cos(pi * x**2 / 8 / d)
+                                 * x)
             Ep1 = sp.integrate.romberg(fun1, 0, 1)
-            fun2 = lambda x: (sp.special.iv(0, pi * H * (1 - x**2))
-                              * sp.special.jv(0, u * x)
-                              * np.sin(pi * x**2 / 8 / d)
-                              * x)
+
+            def fun2(x): return (sp.special.iv(0, pi * H * (1 - x**2))
+                                 * sp.special.jv(0, u * x)
+                                 * np.sin(pi * x**2 / 8 / d)
+                                 * x)
             Ep2 = sp.integrate.romberg(fun2, 0, 1)
             Ep[count] = (1 + np.cos(theta)) / d * abs(Ep1 - 1j * Ep2)
             power = ffpwrden * (Ep[count]**2 / Ep[0]**2)

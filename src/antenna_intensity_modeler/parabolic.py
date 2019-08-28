@@ -112,7 +112,8 @@ def near_field_corrections(parameters, xbar):
     """
     radius, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k = parameters
 
-    delta = np.linspace(0.01, 1.0, 1000)  # Normalized farfield distances
+    # delta = np.linspace(0.01, 1.0, 1000)  # Normalized farfield distances
+    delta = np.logspace(-2, 0, 1000)
     Ep = np.zeros(1000)
     count = 0
     xbarR = xbar * radius

@@ -41,7 +41,7 @@ def test_command_line_interface():
 
 
 def test_parameters():
-    params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
+    params = parabolic.parameters(2.4, 8400., 400.0, 0.62, 20.0)
     np.testing.assert_allclose(
         params,
         (2.4, 8400., 400.0, 0.62, 20.0, 0.4872, 1290.24, 2.1134, 175.929),

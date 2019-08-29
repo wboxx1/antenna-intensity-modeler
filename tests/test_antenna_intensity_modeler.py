@@ -41,16 +41,16 @@ def test_command_line_interface():
 
 
 def test_parameters():
-    params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
+    params = parabolic.parameters(2.4, 8400., 400.0, 0.62, 20.0)
     np.testing.assert_allclose(
         params,
-        (2.4, 8.4e9, 400.0, 0.62, 20.0, 0.4872, 1290.24, 2.1134, 175.929),
+        (2.4, 8400., 400.0, 0.62, 20.0, 0.4872, 1290.24, 2.1134, 175.929),
         rtol=1e-3
     )
 
 
 def test_near_field_corrections_function():
-    params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
+    params = parabolic.parameters(2.4, 8400., 400.0, 0.62, 20.0)
     table = parabolic.near_field_corrections(params, 1.0)
     np.testing.assert_allclose(
         [table.delta.sum(), table.Pcorr.sum()],
@@ -60,12 +60,12 @@ def test_near_field_corrections_function():
 
 
 def test_hazard_plot_function():
-    params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
+    params = parabolic.parameters(2.4, 8400., 400.0, 0.62, 20.0)
     fig, ax = parabolic.hazard_plot(params, 10.0)
     lines = ax.lines
     x_plot, y_plot = lines[0].get_data()
     np.testing.assert_allclose(
         y_plot[0:3],
-        [2.13333333, 2.13333333, 2.13333333],
+        [2.16, 2.16, 2.16],
         rtol=1e-5
     )

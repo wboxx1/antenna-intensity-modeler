@@ -24,7 +24,7 @@ def parameters(radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio
     functions.
 
     :param radius_meters: antenna radius in meters.
-    :param freq_mhz: frequency in hertz.
+    :param freq_mhz: frequency in megahertz.
     :param power_watts: output power of radio in watts.
     :param efficiency: efficiency of antenna.
     :param side_lobe_ratio: side lobe ratio of antenna.
@@ -38,9 +38,9 @@ def parameters(radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio
     :Example:
 
     >>> from antenna_intensity_modeler import parabolic
-    >>> params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
+    >>> params = parabolic.parameters(2.4, 8400., 400.0, 0.62, 20.0)
     >>> params
-    (2.4, 8.4e9, 400, 0.62, 20, 0.4872, 1290.24, 2.1134, 175.929)
+    (2.4, 8400., 400, 0.62, 20, 0.4872, 1290.24, 2.1134, 175.929)
     """
 
     """Constants"""
@@ -63,8 +63,9 @@ def parameters(radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio
         45: 1.9681,
         50: 2.2026
     }
+    freq_hz = freq_mhz*1e6
     DIAM = 2 * radius_meters
-    LAMDA = C / freq_mhz
+    LAMDA = C / freq_hz
     GAIN = 10 * np.log10(efficiency * (pi * DIAM / LAMDA)**2)
     EIRP = power_watts * 10**(0.1 * GAIN)
 

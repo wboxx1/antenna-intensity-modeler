@@ -66,6 +66,6 @@ def test_hazard_plot_function():
     x_plot, y_plot = lines[0].get_data()
     np.testing.assert_allclose(
         y_plot[0:3],
-        [2.13333333, 2.13333333, 2.13333333],
+        [2.16, 2.16, 2.16],
         rtol=1e-5
     )

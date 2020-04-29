@@ -120,3 +120,25 @@ alabaster
 
 # VSCode
 .vscode/
+
+# local ignores
+DARC.py
+DARC2.py
+DARC3.py
+DARC4.py
+DARC5.py
+limit_line_0.9_angle_0.csv
+limit_line_0.9_angle_5.csv
+limit_line_10.0_angle_0.csv
+limit_line_10.0_angle_5.csv
+limit_line_14.9_angle_0.csv
+limit_line_14.9_angle_5.csv
+limit_line_38.2_angle_0.csv
+limit_line_38.2_angle_5.csv
+limit_line_100.0_angle_0.csv
+limit_line_100.0_angle_5.csv
+limit_line_128.4_angle_0.csv
+limit_line_128.4_angle_5.csv
+limitation_line_angle_0.csv
+limitation_line_angle_5.csv
+test.py

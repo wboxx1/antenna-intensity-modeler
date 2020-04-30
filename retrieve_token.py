@@ -12,3 +12,5 @@ if os.path.exists(pyprc_path):
     if not password:
         password = cfg.get("pypi", "password", fallback=None)
         os.environ["POETRY_PYPI_TOKEN_PYPI"] = password
+else:
+    print("Couldn't find that shit.")

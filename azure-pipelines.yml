@@ -104,9 +104,8 @@ stages:
 
     - script: |
         python retrieve_token.py
-        poetry config pypi-token.pypi $POETRY_PYPI_TOKEN_PYPI
       displayName: 'Retrieve token'
 
     - script: |
-        poetry publish
+        poetry publish -u __token__ -p $POETRY_PYPI_TOKEN_PYPI
       displayName: 'Publish'

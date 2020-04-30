@@ -100,5 +100,8 @@ stages:
 
     - script: |
         poetry build
+      displayName: 'Build'
+
+    - script: |
         poetry run twine upload -r "pypitest" --config-file $(PYPIRC_PATH) dist/*
-      displayName: 'Build and publish'
+      displayName: 'Publish'

@@ -107,5 +107,5 @@ stages:
       displayName: 'Retrieve token'
 
     - script: |
-        poetry publish -u wboxx1 -p $(POETRY_PYPI_TOKEN_PYPI)
+        poetry publish -u wboxx1 -p $POETRY_PYPI_TOKEN_PYPI
       displayName: 'Publish'

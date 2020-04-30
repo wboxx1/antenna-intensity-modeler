@@ -6,9 +6,10 @@
 jobs:
 - job: 'Windows'
   trigger:
-    include:
-    - master
-    - hotfix-*
+    branches:
+      include:
+      - master
+      - "hotfix-*"
 
   pool:
     vmImage: 'vs2017-win2016'
@@ -40,9 +41,10 @@ jobs:
 
 - job: 'Linux'
   trigger:
-    include:
-    - master
-    - hotfix-*
+    branches:
+      include:
+      - master
+      - "hotfix-*"
 
   pool:
     vmImage: 'ubuntu-latest'

@@ -103,7 +103,7 @@ stages:
       displayName: 'Build'
 
     - script: |
-        poetry run python retrieve_token.py
+        python retrieve_token.py
       displayName: 'Retrieve token'
 
     - script: |

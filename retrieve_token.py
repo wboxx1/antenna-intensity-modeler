@@ -11,6 +11,9 @@ if os.path.exists(pyprc_path):
     cfg.read(pyprc_path)
     username = cfg.get("pypi", "username", fallback=None)
     password = cfg.get("pypi", "password", fallback=None)
+    token = cfg.get("pypi", "token", fallback=None)
+    print(password)
+    print(token)
     os.environ["POETRY_PYPI_TOKEN_PYPI"] = password
 else:
     print("Couldn't find that shit.")

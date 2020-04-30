@@ -32,6 +32,5 @@ steps:
   displayName: 'Install dependencies'
 
 - script: |
-    pip install pytest pytest-azurepipelines
-    poetry run pytest
-  displayName: 'pytest'
+    tox -e $TOX_ENV
+  displayName: 'tox'

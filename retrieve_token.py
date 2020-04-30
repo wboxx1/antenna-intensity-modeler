@@ -8,14 +8,10 @@ pyprc_path = os.environ["PYPIRC_PATH"]
 if os.path.exists(pyprc_path):
     print("Path exists.")
     cfg = configparser.ConfigParser()
-    print(cfg.read(pyprc_path))
-    print(cfg.sections())
-    for sec in cfg.sections():
-        for key in sec:
-            print(key)
-    username = cfg.get("pypi", "username", fallback=None)
-    password = cfg.get("pypi", "password", fallback=None)
-    token = cfg.get("pypi", "token", fallback=None)
+    cfg.read(pyprc_path)
+    username = cfg.get("pypitest", "username", fallback=None)
+    password = cfg.get("pypitest", "password", fallback=None)
+    token = cfg.get("pypitest", "token", fallback=None)
     print(password)
     print(token)
     os.environ["POETRY_PYPI_TOKEN_PYPI"] = password

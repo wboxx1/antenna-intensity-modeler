@@ -4,6 +4,9 @@ import sys
 
 
 pyprc_path = os.path.expanduser("~/.pypirc")
+print("first: {}".format(pyprc_path))
+pyprc_path = os.environ["PYPIRC_PATH"]
+print("second: {}".format(pyprc_path))
 if os.path.exists(pyprc_path):
     print("Path exists.")
     cfg.read(pyprc_path)

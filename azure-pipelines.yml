@@ -80,19 +80,19 @@ stages:
       pool:
         vmImage: 'ubuntu-latest'
 
-      - steps:
+      steps:
 
-        - task: UsePythonVersion@0
-          inputs:
-            versionSpec: '3.7'
-          displayName: 'Use Python 3.7'
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.7'
+        displayName: 'Use Python 3.7'
 
-        - task: TwineAuthenticate@1
-          displayName: 'Twine Authenticate'
-          inputs:
-            # In this case, name of the service connection is "pypitest".
-            pythonUploadServiceConnection: pypitest
+      - task: TwineAuthenticate@1
+        displayName: 'Twine Authenticate'
+        inputs:
+          # In this case, name of the service connection is "pypitest".
+          pythonUploadServiceConnection: pypitest
 
-        - script: |
-            poetry build
-            poetry run twine upload -r "pypitest" --config-file $(PYPIRC_PATH) dist/*
+      - script: |
+          poetry build
+          poetry run twine upload -r "pypitest" --config-file $(PYPIRC_PATH) dist/*

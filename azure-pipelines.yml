@@ -27,9 +27,9 @@ stages:
 
     steps:
     - task: UsePythonVersion@0
+      displayName: 'Use Python $(python.version)'
       inputs:
         versionSpec: '$(python.version)'
-      displayName: 'Use Python $(python.version)'
 
     - script: |
         python -m pip install --upgrade pip
@@ -57,9 +57,9 @@ stages:
 
     steps:
     - task: UsePythonVersion@0
+      displayName: 'Use Python $(python.version)'
       inputs:
         versionSpec: '$(python.version)'
-      displayName: 'Use Python $(python.version)'
 
     - script: |
         python -m pip install --upgrade pip
@@ -83,9 +83,9 @@ stages:
     steps:
 
     - task: UsePythonVersion@0
+      displayName: 'Use Python 3.7'
       inputs:
         versionSpec: '3.7'
-      displayName: 'Use Python 3.7'
 
     - task: TwineAuthenticate@1
       displayName: 'Twine Authenticate'
@@ -94,5 +94,11 @@ stages:
         pythonUploadServiceConnection: pypitest
 
     - script: |
+        python -m pip install --upgrade pip
+        pip install poetry
+      displayName: 'Install dependencies'
+
+    - script: |
         poetry build
         poetry run twine upload -r "pypitest" --config-file $(PYPIRC_PATH) dist/*
+      displayName: 'Build and publish'

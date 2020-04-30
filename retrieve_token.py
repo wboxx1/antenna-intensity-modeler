@@ -5,6 +5,7 @@ import sys
 
 pyprc_path = os.path.expanduser("~/.pypirc")
 if os.path.exists(pyprc_path):
+    print("Path exists.")
     cfg.read(pyprc_path)
     cfg = configparser.ConfigParser()
     username = username or cfg.get("pypi", "username", fallback=None)

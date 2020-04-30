@@ -9,8 +9,8 @@ pyprc_path = os.environ["PYPIRC_PATH"]
 print("second: {}".format(pyprc_path))
 if os.path.exists(pyprc_path):
     print("Path exists.")
-    cfg.read(pyprc_path)
     cfg = configparser.ConfigParser()
+    cfg.read(pyprc_path)
     username = username or cfg.get("pypi", "username", fallback=None)
     if not password:
         password = cfg.get("pypi", "password", fallback=None)

@@ -103,5 +103,9 @@ stages:
       displayName: 'Build'
 
     - script: |
-        poetry run twine upload -r "pypitest" --config-file $(PYPIRC_PATH) *.whl
+        poetry run python retrieve_token.py
+      displayName: 'Retrieve token'
+
+    - script: |
+        poetry publish -u wboxx1 -p $(POETRY_PYPI_TOKEN_PYPI)
       displayName: 'Publish'

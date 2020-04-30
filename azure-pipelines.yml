@@ -9,62 +9,80 @@ trigger:
     - master
     - "hotfix-*"
 
-jobs:
-- job: 'Windows'  
+stages:
+- stage: Test
+    jobs:
+    - job: 'Windows'  
 
-  pool:
-    vmImage: 'vs2017-win2016'
-  strategy:
-    matrix:
-      Python35:
-        python.version: '3.5'
-      Python36:
-        python.version: '3.6'
-      Python37:
-        python.version: '3.7'
+      pool:
+        vmImage: 'vs2017-win2016'
+      strategy:
+        matrix:
+          Python35:
+            python.version: '3.5'
+          Python36:
+            python.version: '3.6'
+          Python37:
+            python.version: '3.7'
 
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(python.version)'
-    displayName: 'Use Python $(python.version)'
+      steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+        displayName: 'Use Python $(python.version)'
 
-  - script: |
-      python -m pip install --upgrade pip
-      pip install poetry
-    displayName: 'Install dependencies'
+      - script: |
+          python -m pip install --upgrade pip
+          pip install poetry
+        displayName: 'Install dependencies'
 
-  - script: |
-      poetry install -v
-      poetry run pytest --cov=src/antenna_intensity_modeler tests/
-    displayName: 'Run tests'
+      - script: |
+          poetry install -v
+          poetry run pytest --cov=src/antenna_intensity_modeler tests/
+        displayName: 'Run tests'
 
 
-- job: 'Linux'
+    - job: 'Linux'
 
-  pool:
-    vmImage: 'ubuntu-latest'
-  strategy:
-    matrix:
-      Python35:
-        python.version: '3.5'
-      Python36:
-        python.version: '3.6'
-      Python37:
-        python.version: '3.7'
+      pool:
+        vmImage: 'ubuntu-latest'
+      strategy:
+        matrix:
+          Python35:
+            python.version: '3.5'
+          Python36:
+            python.version: '3.6'
+          Python37:
+            python.version: '3.7'
 
-  steps:
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '$(python.version)'
-    displayName: 'Use Python $(python.version)'
+      steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '$(python.version)'
+        displayName: 'Use Python $(python.version)'
 
-  - script: |
-      python -m pip install --upgrade pip
-      pip install poetry
-    displayName: 'Install dependencies'
+      - script: |
+          python -m pip install --upgrade pip
+          pip install poetry
+        displayName: 'Install dependencies'
 
-  - script: |
-      poetry install -v
-      poetry run pytest --cov=src/antenna_intensity_modeler tests/
-    displayName: 'Run tests'
+      - script: |
+          poetry install -v
+          poetry run pytest --cov=src/antenna_intensity_modeler tests/
+        displayName: 'Run tests'
+        
+  - stage: Publish
+    dependsOn: Test
+    condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+    jobs:
+    - job: 'Publish'
+
+      - task: TwineAuthenticate@1
+        displayName: 'Twine Authenticate'
+        inputs:
+          # In this case, name of the service connection is "pypitest".
+          pythonUploadServiceConnection: pypitest
+
+       - script: |
+           poetry build
+           poetry run twine upload -r "pypitest" --config-file $(PYPIRC_PATH) dist/*

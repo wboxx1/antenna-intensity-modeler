@@ -109,6 +109,6 @@ stages:
     - script: |
         echo $PYPIRC_PATH
         pwd
-        ls
+        ls -a dist/
         poetry run twine upload -r "pypitest" --config-file $PYPIRC_PATH dist/*.whl
       displayName: 'Publish'

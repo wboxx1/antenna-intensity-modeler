@@ -96,6 +96,7 @@ stages:
     - script: |
         python -m pip install --upgrade pip
         pip install poetry
+        pip install twine
       displayName: 'Install dependencies'
 
     - script: |
@@ -103,12 +104,5 @@ stages:
       displayName: 'Build'
 
     - script: |
-        poetry run python retrieve_token.py
-      displayName: 'Retrieve token'
-
-    - script: |
-        echo $PYPIRC_PATH
-        pwd
-        poetry run ls -a
-        twine upload -r "pypitest" --config-file $PYPIRC_PATH dist/*.whl
+        twine upload -r "pypitest" --config-file $PYPIRC_PATH dist/*
       displayName: 'Publish'

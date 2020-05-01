@@ -107,5 +107,5 @@ stages:
       displayName: 'Retrieve token'
 
     - script: |
-        poetry publish -u __token__ -p $POETRY_PYPI_TOKEN_PYPI
+        poetry run twine upload -r "pypitest" --config-file $PYPIRC_PATH dist/*.whl
       displayName: 'Publish'

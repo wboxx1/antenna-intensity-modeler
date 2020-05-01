@@ -4,6 +4,7 @@ import sys
 import configparser
 
 pyprc_path = os.environ["PYPIRC_PATH"]
+print(os.getcwd())
 
 if os.path.exists(pyprc_path):
     print("Path exists.")

@@ -54,7 +54,7 @@ lint: ## check style with flake8
 	flake8 antenna_intensity_modeler tests
 
 test: ## run tests quickly with the default Python
-	poetry run pytest
+	poetry run pytest --cov=src/antenna_intensity_modeler tests/
 
 test-all: ## run tests on every Python version with tox
 	poetry run tox
@@ -68,7 +68,7 @@ coverage: ## check code coverage quickly with the default Python
 docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/antenna_intensity_modeler.rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ antenna_intensity_modeler
+	sphinx-apidoc -o docs/ src/antenna_intensity_modeler
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html
@@ -77,16 +77,16 @@ servedocs: docs ## compile the docs watching for changes
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
 
 release: dist ## package and upload a release
-    poetry publish
+	poetry publish
 
 dist: clean ## builds source and wheel package
-    poetry build
+	poetry build
 
 install: clean ## install the package to the active Python's site-packages
 	poetry install
 
 version-major:
-    bump2version major
+	bump2version major
 
 version-minor:
-    bump2version minor
+	bump2version minor

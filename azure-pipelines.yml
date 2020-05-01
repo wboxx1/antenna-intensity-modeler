@@ -106,4 +106,3 @@ stages:
     - script: |
         twine upload -r pypitest --config-file $PYPIRC_PATH dist/*
       displayName: 'Publish'
-      # test

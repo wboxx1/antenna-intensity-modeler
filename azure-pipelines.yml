@@ -1,0 +1,108 @@
+# Python package
+# Create and test a Python package on multiple Python versions.
+# Add steps that analyze code, save the dist with the build record, publish to a PyPI-compatible index, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/python
+
+trigger:
+  branches:
+    include:
+    - master
+    - "hotfix-*"
+
+stages:
+- stage: Test
+  jobs:
+  - job: 'Windows'  
+
+    pool:
+      vmImage: 'vs2017-win2016'
+    strategy:
+      matrix:
+        Python35:
+          python.version: '3.5'
+        Python36:
+          python.version: '3.6'
+        Python37:
+          python.version: '3.7'
+
+    steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python $(python.version)'
+      inputs:
+        versionSpec: '$(python.version)'
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install poetry
+      displayName: 'Install dependencies'
+
+    - script: |
+        poetry install -v
+        poetry run pytest --cov=src/antenna_intensity_modeler tests/
+      displayName: 'Run tests'
+
+
+  - job: 'Linux'
+
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      matrix:
+        Python35:
+          python.version: '3.5'
+        Python36:
+          python.version: '3.6'
+        Python37:
+          python.version: '3.7'
+
+    steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python $(python.version)'
+      inputs:
+        versionSpec: '$(python.version)'
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install poetry
+      displayName: 'Install dependencies'
+
+    - script: |
+        poetry install -v
+        poetry run pytest --cov=src/antenna_intensity_modeler tests/
+      displayName: 'Run tests'
+        
+- stage: Publish
+  dependsOn: Test
+  condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+  jobs:
+
+  - job: 'Publish'
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    steps:
+
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.7'
+      inputs:
+        versionSpec: '3.7'
+
+    - task: TwineAuthenticate@1
+      displayName: 'Twine Authenticate'
+      inputs:
+        # In this case, name of the service connection is "pypitest".
+        pythonUploadServiceConnection: pypitest
+
+    - script: |
+        python -m pip install --upgrade pip
+        pip install poetry
+        pip install twine
+      displayName: 'Install dependencies'
+
+    - script: |
+        poetry build
+      displayName: 'Build'
+
+    - script: |
+        twine upload -r pypitest --config-file $PYPIRC_PATH dist/*
+      displayName: 'Publish'

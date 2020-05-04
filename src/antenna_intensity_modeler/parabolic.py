@@ -42,7 +42,8 @@ def parameters(radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio
     >>> from antenna_intensity_modeler import parabolic
     >>> params = parabolic.parameters(2.4, 8400., 400.0, 0.62, 20.0)
     >>> params
-    (2.4, 8400., 400, 0.62, 20, 0.4872, 1290.24, 2.1134, 175.929)
+    {'radius_meters': 2.4, 'freq_mhz': 8400.0, 'power_watts': 400.0, 'efficiency': 0.62,
+    'side_lobe_ratio':20.0, 'H': 0.4872, 'ffmin': 1290.24, 'ffpwrden': 2.1134, 'k': 175.929}
     """
 
     """Constants"""

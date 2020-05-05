@@ -118,13 +118,13 @@ def near_field_corrections(parameters: dict, xbar: float):
     >>> ax.set_xlim([0.01, 1.0])
     >>> ax.grid(True, which="both")
     >>> ax.minorticks_on()
-    >>> side_lobe_ratio = params[4]
-    >>> ax.set_title("Near Field Corrections xbar: %s , slr: %s" % (xbar, side_lobe_ratio))
+    >>> slr = params.get('side_lobe_ratio')
+    >>> ax.set_title("Near Field Corrections xbar: %s , slr: %s" % (xbar, slr))
     >>> ax.set_xlabel("Normalized On Axis Distance")
     >>> ax.set_ylabel("Normalized On Axis Power Density")
     >>> fig.show()
 
-    .. image:: _static/nfcImage.png
+    .. image:: _static/near_field_plot.png
     """
     # radius, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k = tuple(parameters)
     radius = parameters.get("radius_meters")
@@ -460,8 +460,24 @@ def hazard_plot(parameters, limit, density=1000, xbar_max=1, gain_boost=None):
     :Example:
 
     >>> from antenna_intensity_modeler import parabolic
+    >>> import matplotlib.pyplot as plt
+    >>>
     >>> params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
-    >>> fig, ax = hazard_plot(params, 10.0)
+    >>> limit = 10.0
+    >>> df = parabolic.hazard_plot(params, limit)
+    >>> rng = df.range.values
+    >>> positives = df.positives.values
+    >>> negatives = df.negatives.values
+    >>>
+    >>> fig, ax = plt.subplots()
+    >>> ax.plot(range, positives, range, negatives)
+    >>> ax.grid(True, which='both')
+    >>> ax.minorticks_on()
+    >>> ax.set_title('Hazard Plot with limit: %s w/m^2' % limit)
+    >>> ax.set_xlabel('Distance From Antenna(m)')
+    >>> ax.set_ylabel('Off Axis Distance (m)')
+
+    .. image:: _static/hazard_plot.png
     """
 
     radius_meters = parameters.get("radius_meters")

@@ -42,7 +42,7 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
-<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">integrate</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">integrate</span>
 <span class="kn">import</span> <span class="nn">scipy.special</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -156,13 +156,13 @@
 <span class="sd">    &gt;&gt;&gt; ax.set_xlim([0.01, 1.0])</span>
 <span class="sd">    &gt;&gt;&gt; ax.grid(True, which=&quot;both&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; ax.minorticks_on()</span>
-<span class="sd">    &gt;&gt;&gt; side_lobe_ratio = params[4]</span>
-<span class="sd">    &gt;&gt;&gt; ax.set_title(&quot;Near Field Corrections xbar: %s , slr: %s&quot; % (xbar, side_lobe_ratio))</span>
+<span class="sd">    &gt;&gt;&gt; slr = params.get(&#39;side_lobe_ratio&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; ax.set_title(&quot;Near Field Corrections xbar: %s , slr: %s&quot; % (xbar, slr))</span>
 <span class="sd">    &gt;&gt;&gt; ax.set_xlabel(&quot;Normalized On Axis Distance&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; ax.set_ylabel(&quot;Normalized On Axis Power Density&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; fig.show()</span>
 
-<span class="sd">    .. image:: _static/nfcImage.png</span>
+<span class="sd">    .. image:: _static/near_field_plot.png</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># radius, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k = tuple(parameters)</span>
     <span class="n">radius</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;radius_meters&quot;</span><span class="p">)</span>
@@ -498,8 +498,24 @@
 <span class="sd">    :Example:</span>
 
 <span class="sd">    &gt;&gt;&gt; from antenna_intensity_modeler import parabolic</span>
+<span class="sd">    &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">    &gt;&gt;&gt;</span>
 <span class="sd">    &gt;&gt;&gt; params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)</span>
-<span class="sd">    &gt;&gt;&gt; fig, ax = hazard_plot(params, 10.0)</span>
+<span class="sd">    &gt;&gt;&gt; limit = 10.0</span>
+<span class="sd">    &gt;&gt;&gt; df = parabolic.hazard_plot(params, limit)</span>
+<span class="sd">    &gt;&gt;&gt; rng = df.range.values</span>
+<span class="sd">    &gt;&gt;&gt; positives = df.positives.values</span>
+<span class="sd">    &gt;&gt;&gt; negatives = df.negatives.values</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; fig, ax = plt.subplots()</span>
+<span class="sd">    &gt;&gt;&gt; ax.plot(range, positives, range, negatives)</span>
+<span class="sd">    &gt;&gt;&gt; ax.grid(True, which=&#39;both&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; ax.minorticks_on()</span>
+<span class="sd">    &gt;&gt;&gt; ax.set_title(&#39;Hazard Plot with limit: %s w/m^2&#39; % limit)</span>
+<span class="sd">    &gt;&gt;&gt; ax.set_xlabel(&#39;Distance From Antenna(m)&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; ax.set_ylabel(&#39;Off Axis Distance (m)&#39;)</span>
+
+<span class="sd">    .. image:: _static/hazard_plot.png</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">radius_meters</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;radius_meters&quot;</span><span class="p">)</span>

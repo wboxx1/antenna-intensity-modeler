@@ -24,14 +24,15 @@ classifiers = [
     "Programming Language :: Python :: 3.5",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8"
 ]
 [tool.poetry.dependencies]
 # List project dependencies here
-python = "^3.5"
+python = "^3.4"
 numpy = "^1.15"
 pandas = "^0.23"
 scipy = "^1.1"
-matplotlib = "^3.0"
+matplotlib = "^3.2"
 click = "^7.0"
 
 [tool.poetry.dev-dependencies]

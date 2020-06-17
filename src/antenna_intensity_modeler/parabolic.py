@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """Main module."""
 
 import numpy as np
@@ -8,6 +7,8 @@ from scipy import integrate
 import scipy.special
 import matplotlib.pyplot as plt
 import pandas as pd
+from functools import partial
+from multiprocessing import Pool
 
 # Units
 m = 1.0
@@ -92,7 +93,49 @@ def parameters(radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio
     # return radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k
 
 
-def near_field_corrections(parameters: dict, xbar: float):
+def __run_near_field_corrections(d: float, parameters: dict, xbar: float):
+    radius = parameters["radius_meters"]
+    freq_mhz = parameters["freq_mhz"]
+    power_watts = parameters["power_watts"]
+    efficiency = parameters["efficiency"]
+    side_lobe_ratio = parameters["side_lobe_ratio"]
+    H = parameters["H"]
+    ffmin = parameters["ffmin"]
+    ffpwrden = parameters["ffpwrden"]
+    k = parameters["k"]
+
+    xbarR = xbar * radius
+    theta = np.arctan(xbarR / (d * ffmin))
+    u = k * radius * np.sin(theta)
+
+    def fun1(x):
+        return (
+            1
+            * scipy.special.iv(0, pi * H * (1 - x ** 2))  # **(1 / 2))
+            # * (1 - x**2)
+            * scipy.special.jv(0, u * x)
+            * np.cos(pi * x ** 2 / 8 / d)
+            * x
+        )
+
+    Ep1 = scipy.integrate.romberg(fun1, 0, 1)
+
+    def fun2(x):
+        return (
+            1
+            * scipy.special.iv(0, pi * H * (1 - x ** 2))  # **(1 / 2))
+            # * (1 - x**2)
+            * scipy.special.jv(0, u * x)
+            * np.sin(pi * x ** 2 / 8 / d)
+            * x
+        )
+
+    Ep2 = scipy.integrate.romberg(fun2, 0, 1)
+
+    return (1 + np.cos(theta)) / d * abs(Ep1 - 1j * Ep2)
+
+
+def near_field_corrections(parameters, xbar):
     """Near field corrections for parabolic dish.
 
     Receives user input parameters and normalized off axis distance
@@ -101,7 +144,7 @@ def near_field_corrections(parameters: dict, xbar: float):
 
     :param parameters: parameters tuple created with parameters function
     :param xbar: normalized off-axis distance
-    :type parameters: dict
+    :type parameters: tuple(float)
     :type xbar: float
     :returns: dataframe
     :rtype: pandas dataframe
@@ -125,66 +168,76 @@ def near_field_corrections(parameters: dict, xbar: float):
 
     .. image:: _static/nfcImage.png
     """
-    # radius, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k = tuple(parameters)
-    radius = parameters.get("radius_meters")
-    freq_mhz = parameters.get("freq_mhz")
-    power_watts = parameters.get("power_watts")
-    efficiency = parameters.get("efficiency")
-    side_lobe_ratio = parameters.get("side_lobe_ratio")
-    H = parameters.get("H")
-    ffmin = parameters.get("ffmin")
-    ffpwrden = parameters.get("ffpwrden")
-    k = parameters.get("k")
 
-    # delta = np.linspace(0.01, 1.0, 1000)  # Normalized farfield distances
+    run_with_params = partial(
+        __run_near_field_corrections, parameters=parameters, xbar=xbar
+    )
     delta = np.logspace(-2, 0, 1000)
-    Ep = np.zeros(1000)
-    count = 0
-    xbarR = xbar * radius
+    # Ep = np.array(map(lambda x: run_with_params(x) ** 2, delta))
+    p = Pool(5)
+    Ep = np.array(list(p.map(run_with_params, delta)))
+    Pcorr = Ep ** 2 / Ep[-1] ** 2 * parameters["ffpwrden"]
 
-    for d in delta:
-        theta = np.arctan(xbarR / (d * ffmin))
-        u = k * radius * np.sin(theta)
+    # # radius, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k = tuple(parameters)
+    # radius = parameters["radius_meters"]
+    # freq_mhz = parameters["freq_mhz"]
+    # power_watts = parameters["power_watts"]
+    # efficiency = parameters["efficiency"]
+    # side_lobe_ratio = parameters["side_lobe_ratio"]
+    # H = parameters["H"]
+    # ffmin = parameters["ffmin"]
+    # ffpwrden = parameters["ffpwrden"]
+    # k = parameters["k"]
 
-        def fun1(x):
-            return (
-                1
-                * scipy.special.iv(0, pi * H * (1 - x ** 2))  # **(1 / 2))
-                # * (1 - x**2)
-                * scipy.special.jv(0, u * x)
-                * np.cos(pi * x ** 2 / 8 / d)
-                * x
-            )
+    # # delta = np.linspace(0.01, 1.0, 1000)  # Normalized farfield distances
+    # delta = np.logspace(-2, 0, 1000)
+    # Ep = np.zeros(1000)
+    # count = 0
+    # xbarR = xbar * radius
 
-        Ep1 = scipy.integrate.romberg(fun1, 0, 1)
-        # Ep1 = sum(fun1(np.linspace(0, 1, 1000)))
+    # for d in delta:
+    #     theta = np.arctan(xbarR / (d * ffmin))
+    #     u = k * radius * np.sin(theta)
 
-        def fun2(x):
-            return (
-                1
-                * scipy.special.iv(0, pi * H * (1 - x ** 2))  # **(1 / 2))
-                # * (1 - x**2)
-                * scipy.special.jv(0, u * x)
-                * np.sin(pi * x ** 2 / 8 / d)
-                * x
-            )
+    #     def fun1(x):
+    #         return (
+    #             1
+    #             * scipy.special.iv(0, pi * H * (1 - x ** 2))  # **(1 / 2))
+    #             # * (1 - x**2)
+    #             * scipy.special.jv(0, u * x)
+    #             * np.cos(pi * x ** 2 / 8 / d)
+    #             * x
+    #         )
 
-        Ep2 = scipy.integrate.romberg(fun2, 0, 1)
-        # Ep2 = sum(fun2(np.linspace(0, 1, 1000)))
-        Ep[count] = (1 + np.cos(theta)) / d * abs(Ep1 - 1j * Ep2)
-        count += 1
+    #     Ep1 = scipy.integrate.romberg(fun1, 0, 1)
+    #     # Ep1 = sum(fun1(np.linspace(0, 1, 1000)))
 
-    Pcorr = (Ep ** 2 / Ep[-1] ** 2) * ffpwrden
+    #     def fun2(x):
+    #         return (
+    #             1
+    #             * scipy.special.iv(0, pi * H * (1 - x ** 2))  # **(1 / 2))
+    #             # * (1 - x**2)
+    #             * scipy.special.jv(0, u * x)
+    #             * np.sin(pi * x ** 2 / 8 / d)
+    #             * x
+    #         )
 
-    # fig, ax = plt.subplots()
-    # ax.semilogx(delta, Pcorr)
-    # ax.set_xlim([0.01, 1.0])
-    # ax.grid(True, which="both")
-    # ax.minorticks_on()
-    # ax.set_title("Near Field Corrections xbar: %s , slr: %s" % (xbar, side_lobe_ratio))
-    # ax.set_xlabel("Normalized On Axis Distance")
-    # ax.set_ylabel("Normalized On Axis Power Density")
-    # return fig, ax
+    #     Ep2 = scipy.integrate.romberg(fun2, 0, 1)
+    #     # Ep2 = sum(fun2(np.linspace(0, 1, 1000)))
+    #     Ep[count] = (1 + np.cos(theta)) / d * abs(Ep1 - 1j * Ep2)
+    #     count += 1
+
+    # Pcorr = (Ep ** 2 / Ep[-1] ** 2) * ffpwrden
+
+    # # fig, ax = plt.subplots()
+    # # ax.semilogx(delta, Pcorr)
+    # # ax.set_xlim([0.01, 1.0])
+    # # ax.grid(True, which="both")
+    # # ax.minorticks_on()
+    # # ax.set_title("Near Field Corrections xbar: %s , slr: %s" % (xbar, side_lobe_ratio))
+    # # ax.set_xlabel("Normalized On Axis Distance")
+    # # ax.set_ylabel("Normalized On Axis Power Density")
+    # # return fig, ax
     return pd.DataFrame(dict(delta=delta, Pcorr=Pcorr))
 
 
@@ -445,7 +498,7 @@ def hazard_plot(parameters, limit, density=1000, xbar_max=1, gain_boost=None):
     for parabolic dish. Computes and returns hazard distance
     plot.
 
-    :param parameters: parameters dict created with parameters function
+    :param parameters: parameters tuple created with parameters function
     :param limit: power density limit
     :param density: (optional) number of points for plot, if none density=1000
     :param xbar_max: (optional) maximum value for xbar, if none is given xbar_max=1

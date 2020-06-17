@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Main module."""
+
+"""Main module for parabolic reflector antennas."""
 
 import numpy as np
 import scipy as sp
@@ -19,31 +20,35 @@ rad = 1.0
 s = 1.0
 
 
-def parameters(radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio):
+def parameters(
+    radius_meters: float,
+    freq_mhz: float,
+    power_watts: float,
+    efficiency: float,
+    side_lobe_ratio: float,
+) -> dict:
     """Parameters for parabolic dish
 
     Receives user input parameters for parabolic dish and
     computes and returns all needed parameters for parabolic
     functions.
 
-    :param radius_meters: antenna radius in meters.
-    :param freq_mhz: frequency in megahertz.
-    :param power_watts: output power of radio in watts.
-    :param efficiency: efficiency of antenna.
-    :param side_lobe_ratio: side lobe ratio of antenna.
-    :type radius_meters: float
-    :type freq_mhz: float
-    :type power_watts: float
-    :type efficiency: float
-    :type side_lobe_ratio: float
-    :returns: parameters needed for parabolic functions.
-    :rtype: tuple(float)
-    :Example:
+    Args:
+        radius_meters (float): antenna radius in meters.
+        freq_mhz (float): frequency in megahertz.
+        power_watts (float): output power of radio in watts.
+        efficiency (float): efficiency of antenna.
+        side_lobe_ratio (float): side lobe ratio of antenna.
 
-    >>> from antenna_intensity_modeler import parabolic
-    >>> params = parabolic.parameters(2.4, 8400., 400.0, 0.62, 20.0)
-    >>> params
-    (2.4, 8400., 400, 0.62, 20, 0.4872, 1290.24, 2.1134, 175.929)
+    Returns: 
+        dict: parameter dictionary needed for parabolic functions.
+
+    Example:
+        >>> from antenna_intensity_modeler import parabolic
+        >>> params = parabolic.parameters(2.4, 8400., 400.0, 0.62, 20.0)
+        >>> params
+        {'radius_meters': 2.4, 'freq_mhz': 8400.0, 'power_watts': 400.0, 'efficiency': 0.62,
+        'side_lobe_ratio':20.0, 'H': 0.4872, 'ffmin': 1290.24, 'ffpwrden': 2.1134, 'k': 175.929}
     """
 
     """Constants"""
@@ -139,7 +144,7 @@ def near_field_corrections(parameters, xbar):
     """Near field corrections for parabolic dish.
 
     Receives user input parameters and normalized off axis distance
-    for parabolic dish computes and returns plot of near field correction
+    for parabolic dish.  Computes and returns plot of near field correction
     factors.
 
     :param parameters: parameters tuple created with parameters function
@@ -150,21 +155,25 @@ def near_field_corrections(parameters, xbar):
     :rtype: pandas dataframe
     :Example:
 
-    >>> from antenna_intensity_modeler import parabolic
-    >>> import matplotlib.pyplot as plt
-    >>> params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
-    >>> xbar = 1.0
-    >>> table = parabolic.near_field_corrections(params, xbar)
-    >>> fig, ax = plt.subplots()
-    >>> ax.semilogx(table.delta, table.Pcorr)
-    >>> ax.set_xlim([0.01, 1.0])
-    >>> ax.grid(True, which="both")
-    >>> ax.minorticks_on()
-    >>> side_lobe_ratio = params[4]
-    >>> ax.set_title("Near Field Corrections xbar: %s , slr: %s" % (xbar, side_lobe_ratio))
-    >>> ax.set_xlabel("Normalized On Axis Distance")
-    >>> ax.set_ylabel("Normalized On Axis Power Density")
-    >>> fig.show()
+    Returns:
+        pandas.DataFrame: A dataframe with "delta" and "Pcorr" columns
+
+    Example:
+        >>> from antenna_intensity_modeler import parabolic
+        >>> import matplotlib.pyplot as plt
+        >>> params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
+        >>> xbar = 1.0
+        >>> table = parabolic.near_field_corrections(params, xbar)
+        >>> fig, ax = plt.subplots()
+        >>> ax.semilogx(table.delta, table.Pcorr)
+        >>> ax.set_xlim([0.01, 1.0])
+        >>> ax.grid(True, which="both")
+        >>> ax.minorticks_on()
+        >>> slr = params.get('side_lobe_ratio')
+        >>> ax.set_title("Near Field Corrections xbar: %s , slr: %s" % (xbar, slr))
+        >>> ax.set_xlabel("Normalized On Axis Distance")
+        >>> ax.set_ylabel("Normalized On Axis Power Density")
+        >>> fig.show()
 
     .. image:: _static/nfcImage.png
     """
@@ -242,17 +251,15 @@ def near_field_corrections(parameters, xbar):
 
 
 def test_method(parameters, xbar):
-    (
-        radius,
-        freq_mhz,
-        power_watts,
-        efficiency,
-        side_lobe_ratio,
-        H,
-        ffmin,
-        ffpwrden,
-        k,
-    ) = parameters
+    radius = parameters.get("radius_meters")
+    freq_mhz = parameters.get("freq_mhz")
+    power_watts = parameters.get("power_watts")
+    efficiency = parameters.get("efficiency")
+    side_lobe_ratio = parameters.get("side_lobe_ratio")
+    H = parameters.get("H")
+    ffmin = parameters.get("ffmin")
+    ffpwrden = parameters.get("ffpwrden")
+    k = parameters.get("k")
 
     # delta = np.linspace(0.01, 1.0, 1000)  # Normalized farfield distances
     # delta = np.logspace(-2, 0, 100)
@@ -371,7 +378,8 @@ def test_method(parameters, xbar):
         # print(k)
         # print(radius)
         # print(H)
-        print("{} of {}".format(count, len(delta)), end="\r")
+
+        # print("{} of {}".format(count, len(delta)), end="\r")
         for N in range(50):
 
             def fun_b1(x):
@@ -491,29 +499,49 @@ def test_method(parameters, xbar):
     return pd.DataFrame(dict(delta=delta, Pcorr=Pcorr))
 
 
-def hazard_plot(parameters, limit, density=1000, xbar_max=1, gain_boost=None):
+def hazard_plot(
+    parameters: dict,
+    limit: float,
+    density: int = 1000,
+    xbar_max: float = 1.0,
+    gain_boost_db: int = 0,
+):
     """Hazard plot for parabolic dish.
 
     Receives user input parameters and hazard limit
     for parabolic dish. Computes and returns hazard distance
     plot.
 
-    :param parameters: parameters tuple created with parameters function
-    :param limit: power density limit
-    :param density: (optional) number of points for plot, if none density=1000
-    :param xbar_max: (optional) maximum value for xbar, if none is given xbar_max=1
-    :param gain_boost: (optional) additional numerical gain to add
-    :type parameters: tuple(float)
-    :type limit: float
-    :type xbar_max: int
-    :type gain_boost: float
-    :returns: figure and axes for hazard plot
-    :rtype: (figure, axes)
-    :Example:
+    Args:
+        parameters (dict): parameters dict created with parameters function
+        limit (float): power density limit
+        density (int): (optional) number of points for plot, if none density=1000
+        xbar_max (float): (optional) maximum value for xbar, if none is given xbar_max=1
+        gain_boost (int): (optional) additional gain in dB to add to output power
 
-    >>> from antenna_intensity_modeler import parabolic
-    >>> params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
-    >>> fig, ax = hazard_plot(params, 10.0)
+    Returns:
+        pandas.DataFrame: dataframe containing a range column, a positive values column, and a negative values column
+
+    Example:
+        >>> from antenna_intensity_modeler import parabolic
+        >>> import matplotlib.pyplot as plt
+        >>>
+        >>> params = parabolic.parameters(2.4, 8.4e9, 400.0, 0.62, 20.0)
+        >>> limit = 10.0
+        >>> df = parabolic.hazard_plot(params, limit)
+        >>> rng = df.range.values
+        >>> positives = df.positives.values
+        >>> negatives = df.negatives.values
+        >>>
+        >>> fig, ax = plt.subplots()
+        >>> ax.plot(range, positives, range, negatives)
+        >>> ax.grid(True, which='both')
+        >>> ax.minorticks_on()
+        >>> ax.set_title('Hazard Plot with limit: %s w/m^2' % limit)
+        >>> ax.set_xlabel('Distance From Antenna(m)')
+        >>> ax.set_ylabel('Off Axis Distance (m)')
+
+    .. image:: _static/hazard_plot.png
     """
 
     radius_meters = parameters.get("radius_meters")
@@ -537,8 +565,8 @@ def hazard_plot(parameters, limit, density=1000, xbar_max=1, gain_boost=None):
     step = 0.01
     xbars = np.arange(0, xbar_max + step, step)
 
-    if gain_boost is not None:
-        ffpwrden = gain_boost * ffpwrden
+    gain_boost = 10 ** (gain_boost_db / 10.0)
+    ffpwrden = gain_boost * ffpwrden
 
     last = 1e-9
     count = 0
@@ -744,12 +772,11 @@ def combined_hazard_plot(parameters, limit, density=1000):
     return X, Y, pd_field
 
 
-def print_parameters(parameters):
+def print_parameters(parameters: dict):
     """Prints formated parameter list.
 
     Args:
-        parameters(tuple): parameters tuple created with parameters function
-
+        parameters (dict): parameters tuple created with parameters function
     Returns:
         none
     """

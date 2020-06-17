@@ -1,5 +1,6 @@
-Welcome to antenna-intensity-modeler's documentation!
-======================================
+=======
+Welcome to the Antenna Intensity Modeler documentation!
+=======================================================
 
 .. toctree::
    :maxdepth: 2

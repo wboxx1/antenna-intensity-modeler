@@ -93,7 +93,7 @@ def parameters(radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio
     # return radius_meters, freq_mhz, power_watts, efficiency, side_lobe_ratio, H, ffmin, ffpwrden, k
 
 
-def __run_near_field_corrections(d: float, parameters: dict, xbar: float):
+def __run_near_field_corrections(d: float, parameters: dict):
     radius = parameters["radius_meters"]
     freq_mhz = parameters["freq_mhz"]
     power_watts = parameters["power_watts"]
@@ -103,6 +103,7 @@ def __run_near_field_corrections(d: float, parameters: dict, xbar: float):
     ffmin = parameters["ffmin"]
     ffpwrden = parameters["ffpwrden"]
     k = parameters["k"]
+    xbar = parameters["xbar"]
 
     xbarR = xbar * radius
     theta = np.arctan(xbarR / (d * ffmin))
@@ -169,7 +170,7 @@ def near_field_corrections(parameters, xbar):
     .. image:: _static/nfcImage.png
     """
 
-    run_with_params = partial(__run_near_field_corrections, parameters=parameters, xbar=xbar)
+    run_with_params = partial(__run_near_field_corrections, parameters={**parameters, "xbar": xbar})
     delta = np.logspace(-2, 0, 1000)
     # Ep = np.array(map(lambda x: run_with_params(x) ** 2, delta))
     p = Pool(5)

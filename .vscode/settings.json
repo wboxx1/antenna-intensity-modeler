@@ -1,7 +1,8 @@
 {
-    "python.pythonPath": "C:\\Users\\SCYT\\Anaconda3\\envs\\py36\\python.exe",
-    "deepcode.review.results.hideInformationIssues": false,
+    "python.pythonPath": "/home/wboxx1/miniconda3/envs/datascience/bin/python",
     "python.linting.pylintEnabled": true,
     "python.linting.pycodestyleEnabled": false,
-    "python.linting.enabled": true
+    "python.linting.enabled": true,
+    "python.formatting.provider": "black",
+    "deepcode.uploadApproved": true
 }

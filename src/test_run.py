@@ -1,5 +1,4 @@
 from antenna_intensity_modeler import parabolic
-from antenna_intensity_modeler.helpers import Either, Option
 import matplotlib.pyplot as plt
 import time
 import warnings
@@ -14,7 +13,7 @@ def nfc_intermediary(xbar, params, res=1000):
     )
 
 
-def match(monad: Union[Either, Option], some_fun, no_fun):
+def match(monad: Union["Either", "Option"], some_fun, no_fun):
     if isinstance(monad, Some):
         return monad.flat_map(some_fun)
     elif isinstance(monad, Right):

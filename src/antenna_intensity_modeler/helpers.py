@@ -20,6 +20,12 @@ class Monad:
     def map(self, f):
         return self.flat_map(lambda x: self.pure(f(x)))
 
+    # amap :: # M (a -> b) -> M a -> M b
+    def amap(self: 'Monad[Callable[[S], T]]', monad_value: 'Monad[S]') -> 'Monad[T]':
+            """ Applies the function stored in the functor to the value inside 'functor_value'
+            returning a new functor value.
+            """
+            return monad_value.flat_map(self.value)
 
 class Option(Monad):
     # pure :: a -> Option a
@@ -33,6 +39,12 @@ class Option(Monad):
             return f(self.value)
         else:
             return nil
+
+    def if_none(self, x):
+        if self.defined:
+            return self.value
+        else:
+            return x
 
 
 class Some(Option):
@@ -122,7 +134,7 @@ class Future(Monad):
         t = threading.Thread(target=Future.exec, args=[f, cb])
         t.start()
 
-    def async(f):
+    def _async(f):
         return Future(lambda cb: Future.exec_on_thread(f, cb))
 
     # flat_map :: (a -> Future b) -> Future b

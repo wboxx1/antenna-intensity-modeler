@@ -12,7 +12,17 @@ from functools import partial
 from multiprocessing import Pool
 from typing import Union, Callable
 from concurrent.futures import ProcessPoolExecutor
-from .helpers import Either, Left, Right
+
+# from .helpers import Either, Left, Right
+import pymonad
+# from pymonad import *
+from pymonad.operators import *
+from pymonad.operators import Either
+# import pymonad.tools
+curry = pymonad.tools.curry
+# from .local_imports.pymonad import *
+# from .local_imports.pymonad.tools import curry
+# from .local_imports.pymonad.operators import *
 
 # Units
 m = 1.0
@@ -114,6 +124,20 @@ def bessel_func(
     )
 
 
+@curry
+def bessel_func_test(
+    H: float, u: float, d: float, f: Union[np.cos, np.sin], x: float
+) -> Callable:
+    return (
+        1
+        * scipy.special.iv(0, pi * H * (1 - x ** 2))  # **(1 / 2))
+        # * (1 - x**2)
+        * scipy.special.jv(0, u * x)
+        * f(pi * x ** 2 / 8 / d)
+        * x
+    )
+
+
 def romberg_integration(
     fun: Callable, lower: int = 0, upper: int = 1, divmax: int = 20
 ) -> Either:
@@ -143,13 +167,22 @@ def run_near_field_corrections(d: float, parameters: dict, xbar: float) -> float
     bessel_func_cos = partial(bessel_func, f=np.cos, H=H, u=u, d=d)
     bessel_func_sin = partial(bessel_func, f=np.sin, H=H, u=u, d=d)
 
-    # Calculate Powers
-    # Ep1 = romberg_integration(bessel_func_cos, 0, 1, divmax=20)
-    # Ep2 = romberg_integration(bessel_func_sin, 0, 1, divmax=20)
-    Ep1 = scipy.integrate.romberg(bessel_func_cos, 0, 1, divmax=20)
-    Ep2 = scipy.integrate.romberg(bessel_func_sin, 0, 1, divmax=20)
+    # _bessel_func = bessel_func_test(H, u, d)
+    # bessel_func_cos = _bessel_func(np.cos)
+    # bessel_func_sin = _bessel_func(np.sin)
 
-    return (1 + np.cos(theta)) / d * abs(Ep1 - 1j * Ep2)
+    # Calculate Powers
+    Ep1 = romberg_integration(bessel_func_cos, 0, 1, divmax=20)
+    Ep2 = romberg_integration(bessel_func_sin, 0, 1, divmax=20)
+    # Ep1 = scipy.integrate.romberg(bessel_func_cos, 0, 1, divmax=20)
+    # Ep2 = scipy.integrate.romberg(bessel_func_sin, 0, 1, divmax=20)
+
+    @curry
+    def final_reduction(x, y):
+        return (1 + np.cos(theta)) / d * abs(x - 1j * y)
+
+    return final_reduction * Ep1 & Ep2
+    # return (1 + np.cos(theta)) / d * abs(Ep1 - 1j * Ep2)
 
 
 def near_field_corrections(
@@ -196,9 +229,18 @@ def near_field_corrections(
         run_near_field_corrections, parameters=parameters, xbar=xbar
     )
     delta = np.logspace(-2, 0, resolution)
-    with ProcessPoolExecutor() as p:
-        Ep = np.array(list(p.map(run_with_params, delta)))
+    # with ProcessPoolExecutor() as p:
+    #     Ep = np.array(list(p.map(run_with_params, delta)))
+    # power_norm = Ep ** 2 / Ep[-1] ** 2  # * parameters["ffpwrden"]
+    # Ep = list(map(run_with_params, delta))
+    Eplist = list(map(run_with_params, delta))
+    Ep = ListMonad(Eplist)
     power_norm = Ep ** 2 / Ep[-1] ** 2  # * parameters["ffpwrden"]
+    @curry
+    def unwrap(init_val, x):
+        return x.getValue() ** 2 / init_val.getValue() ** 2
+    unwrap_with_init = unwrap(Ep[-1])
+    # power_norm = list(map(unwrap_with_init, Ep))
 
     # return pd.DataFrame(dict(delta=delta, Pcorr=Pcorr))
     return power_norm

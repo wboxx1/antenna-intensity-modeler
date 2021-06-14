@@ -20,19 +20,17 @@ classifiers = [
     "Intended Audience :: Developers",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.4",
-    "Programming Language :: Python :: 3.5",
-    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
 ]
 [tool.poetry.dependencies]
 # List project dependencies here
-python = "^3.5"
+python = "^3.7"
 numpy = "^1.15"
 pandas = "^0.23"
 scipy = "^1.1"
 matplotlib = "^3.0"
 click = "^7.0"
+boxx-pymonad = "^0.2.0"
 
 [tool.poetry.dev-dependencies]
 bump2version = "^0.5.0"

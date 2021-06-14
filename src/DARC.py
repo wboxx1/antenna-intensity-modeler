@@ -13,29 +13,31 @@ def my_interpolate(x, y, n):
 
 
 params = parabolic.parameters(7.5, 3000, 312500, 0.71, 17.57)
-ffmin = params[6]
+ffmin = params["ffmin"]
 C = 1e8
-freq_hz = 3000*1e6
+freq_hz = 3000 * 1e6
 LAMDA = C / freq_hz
 
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(1, 1)
 _density = 100
 el_axis = 9
 degree = 5
 rotate = [
     [np.cos(degree * np.pi / 180), np.sin(degree * np.pi / 180)],
-    [-np.sin(degree * np.pi / 180), np.cos(degree * np.pi / 180)]
+    [-np.sin(degree * np.pi / 180), np.cos(degree * np.pi / 180)],
 ]
 
 # plot off axis limitation
-x = np.linspace(0.01, 1.0, _density)*ffmin
+x = np.linspace(0.01, 1.0, _density) * ffmin
 y = []
 thetas = []
 for x_bar in x:
-    limit = 0.
-    theta = 0.
+    limit = 0.0
+    theta = 0.0
     while limit < 0.08:
-        limit = (np.pi * 7.5**2) / (LAMDA * x_bar) * np.sin(theta * np.pi / 180.)**2
+        limit = (
+            (np.pi * 7.5 ** 2) / (LAMDA * x_bar) * np.sin(theta * np.pi / 180.0) ** 2
+        )
         theta += 0.5
     y.append(x_bar * np.tan(theta * np.pi / 180))
     thetas.append(theta)
@@ -61,12 +63,14 @@ ax.plot(top[:, 0], top[:, 1], bottom[:, 0], bottom[:, 1])
 # limitation_lines.to_csv('limitation_line_angle_{}.csv'.format(degree))
 
 # penis plot
-limits = [0.9]#, 38.2, 14.9, 128.4]
-# limits = [10., 100.]
+# limits = [0.9]  # , 38.2, 14.9, 128.4]
+limits = [100]  # 10.0, 100.0]
 for limit in limits:
-    table = parabolic.hazard_plot(params, limit, xbar_max=15, density=_density, gain_boost=6)
-    _x = table['range']
-    _y = table['positives']
+    table = parabolic.hazard_plot(
+        params, limit, xbar_max=15, density=_density, gain_boost_db=6
+    )
+    _x = table["range"]
+    _y = table["positives"]
     # _y_neg = table['negatives']
     # smooth
     _x, _y = my_interpolate(_x, _y, _density * 10)
@@ -82,18 +86,19 @@ for limit in limits:
     limit_lines = pd.DataFrame(
         np.column_stack((top[:, 0], top[:, 1], bottom[:, 0], bottom[:, 1])),
         columns=[
-            '{}_top_x'.format(limit),
-            '{}_top_y'.format(limit),
-            '{}_bottom_x'.format(limit),
-            '{}_bottom_y'.format(limit)]
+            "{}_top_x".format(limit),
+            "{}_top_y".format(limit),
+            "{}_bottom_x".format(limit),
+            "{}_bottom_y".format(limit),
+        ],
     )
-    limit_lines.to_csv('limit_line_{}_angle_{}.csv'.format(limit, degree))
+    limit_lines.to_csv("limit_line_{}_angle_{}.csv".format(limit, degree))
 
-ax.grid(True, which='both')
+ax.grid(True, which="both")
 ax.minorticks_on()
 # ax.set_title('Hazard Plot with limit: %s w/m^2' % limit)
-ax.set_xlabel('Distance From Antenna(m)')
-ax.set_ylabel('Off Axis Distance (m)')
+ax.set_xlabel("Distance From Antenna(m)")
+ax.set_ylabel("Off Axis Distance (m)")
 ax.set_xlim([0, 2250])
 ax.set_ylim([-40, 40])
 # plot elevation axis

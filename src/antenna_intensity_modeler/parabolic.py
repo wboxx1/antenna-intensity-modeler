@@ -14,15 +14,10 @@ from typing import Union, Callable
 from concurrent.futures import ProcessPoolExecutor
 
 # from .helpers import Either, Left, Right
-import pymonad
-# from pymonad import *
-from pymonad.operators import *
-from pymonad.operators import Either
-# import pymonad.tools
-curry = pymonad.tools.curry
-# from .local_imports.pymonad import *
-# from .local_imports.pymonad.tools import curry
-# from .local_imports.pymonad.operators import *
+from pymonad.tools import curry
+from pymonad.operators.either import Either, Left, Right
+from pymonad.operators.maybe import Maybe, Nothing, Just
+from pymonad.operators.list import ListMonad
 
 # Units
 m = 1.0
@@ -124,20 +119,6 @@ def bessel_func(
     )
 
 
-@curry
-def bessel_func_test(
-    H: float, u: float, d: float, f: Union[np.cos, np.sin], x: float
-) -> Callable:
-    return (
-        1
-        * scipy.special.iv(0, pi * H * (1 - x ** 2))  # **(1 / 2))
-        # * (1 - x**2)
-        * scipy.special.jv(0, u * x)
-        * f(pi * x ** 2 / 8 / d)
-        * x
-    )
-
-
 def romberg_integration(
     fun: Callable, lower: int = 0, upper: int = 1, divmax: int = 20
 ) -> Either:
@@ -167,22 +148,40 @@ def run_near_field_corrections(d: float, parameters: dict, xbar: float) -> float
     bessel_func_cos = partial(bessel_func, f=np.cos, H=H, u=u, d=d)
     bessel_func_sin = partial(bessel_func, f=np.sin, H=H, u=u, d=d)
 
-    # _bessel_func = bessel_func_test(H, u, d)
-    # bessel_func_cos = _bessel_func(np.cos)
-    # bessel_func_sin = _bessel_func(np.sin)
-
     # Calculate Powers
     Ep1 = romberg_integration(bessel_func_cos, 0, 1, divmax=20)
     Ep2 = romberg_integration(bessel_func_sin, 0, 1, divmax=20)
-    # Ep1 = scipy.integrate.romberg(bessel_func_cos, 0, 1, divmax=20)
-    # Ep2 = scipy.integrate.romberg(bessel_func_sin, 0, 1, divmax=20)
+    # Ep1_1 = scipy.integrate.romberg(bessel_func_cos, 0, 1, divmax=20)
+    # Ep2_1 = scipy.integrate.romberg(bessel_func_sin, 0, 1, divmax=20)
 
-    @curry
+    @curry(2)
     def final_reduction(x, y):
         return (1 + np.cos(theta)) / d * abs(x - 1j * y)
 
-    return final_reduction * Ep1 & Ep2
-    # return (1 + np.cos(theta)) / d * abs(Ep1 - 1j * Ep2)
+    # return (1 + np.cos(theta)) / d * abs(Ep1_1 - 1j * Ep2_1)
+    return final_reduction << Ep1 & Ep2
+
+
+def square(x):
+    return x ** 2
+
+
+def squared(x):
+    return square << x
+
+
+@curry(2)
+def divide(x, y):
+    return x / y
+
+
+@curry(2)
+def normalized(y, x):
+    return Nothing if y == Just(0) else divide << x & y
+
+
+def unpacked(x):
+    return x.value
 
 
 def near_field_corrections(
@@ -232,267 +231,17 @@ def near_field_corrections(
     # with ProcessPoolExecutor() as p:
     #     Ep = np.array(list(p.map(run_with_params, delta)))
     # power_norm = Ep ** 2 / Ep[-1] ** 2  # * parameters["ffpwrden"]
+    with ProcessPoolExecutor() as p:
+        Ep = list(p.map(run_with_params, delta))
     # Ep = list(map(run_with_params, delta))
-    Eplist = list(map(run_with_params, delta))
-    Ep = ListMonad(Eplist)
-    power_norm = Ep ** 2 / Ep[-1] ** 2  # * parameters["ffpwrden"]
-    @curry
-    def unwrap(init_val, x):
-        return x.getValue() ** 2 / init_val.getValue() ** 2
-    unwrap_with_init = unwrap(Ep[-1])
-    # power_norm = list(map(unwrap_with_init, Ep))
+    ff_val = Ep[-1]
+    Ep_monad = ListMonad(*Ep)
+
+    power_norm = Ep_monad * squared * normalized(square << ff_val) * unpacked
 
     # return pd.DataFrame(dict(delta=delta, Pcorr=Pcorr))
+    # power_norm = Ep ** 2 / Ep[-1] ** 2  # * parameters["ffpwrden"]
     return power_norm
-
-
-def test_method(parameters, xbar):
-    radius = parameters.get("radius_meters")
-    freq_mhz = parameters.get("freq_mhz")
-    power_watts = parameters.get("power_watts")
-    efficiency = parameters.get("efficiency")
-    side_lobe_ratio = parameters.get("side_lobe_ratio")
-    H = parameters.get("H")
-    ffmin = parameters.get("ffmin")
-    ffpwrden = parameters.get("ffpwrden")
-    k = parameters.get("k")
-
-    # delta = np.linspace(0.01, 1.0, 1000)  # Normalized farfield distances
-    # delta = np.logspace(-2, 0, 100)
-    delta = range(70)
-    Ep = np.zeros(len(delta))
-    count = 0
-    xbarR = xbar * radius
-    C = 3e8
-    lamda = C / (freq_mhz * 1e6)
-    # theta = np.arctan(xbarR / (delta * ffmin))
-    # sintheta = np.sin(theta)
-    # x = np.linspace(-7.5, 7.5, 1000)
-    # u = k * radius * np.sin(theta)
-    # Ep = np.fft.fft(
-    #     1
-    #     # * scipy.special.iv(0, pi * H * (1 - x**2))
-    #     # * scipy.special.jv(0, u * x)
-    #     * np.exp(1j * k * (x**2 / 2 / xbarR))
-    # )
-    # Ep = np.fft.fftshift(Ep)
-    # Ep = Ep * np.exp(-1j * k * 7.5**2 * u**2 / 2 / xbarR)
-
-    # Pcorr = abs(Ep)
-    # for d in delta:
-
-    ###########################3
-    # FSA method without dropping phi
-
-    # delta = np.logspace(-2, 0, 1000)
-    # Ep = np.zeros(len(delta))
-    # for d in delta:
-    #     theta = np.arctan(xbarR / (d * ffmin))
-    #     u = k * radius * np.sin(theta)
-
-    #     def fun1(x,y): return(
-    #         1
-    #         # * scipy.special.iv(0, pi * H * (1 - x**2))
-    #         * np.exp(-1j * k * x**2 / 2 / d)
-    #         * np.exp(1j * k * x * sin(theta) * cos((pi / 8) - y) * x)
-    #     )
-    #     Ep1 = integrate.dblquad(fun1, 0, radius, lambda x: 0, lambda x: 2 * pi)
-
-    #     # def fun2(x,y): return(
-    #     #     1
-    #     #     # * scipy.special.iv(0, pi * H * (1 - x**2))
-    #     #     * sin(k * x**2 / 2 / d)
-    #     #     * sin(k * x * sin(theta) * cos((pi / 8) - y) * x)
-    #     # )
-    #     # Ep2 = integrate.dblquad(fun1, 0, radius, lambda x: 0, lambda x: 2 * pi)
-
-    #     # Ep[count] = (1 + cos(theta)) / 4 / pi / d * abs(Ep1[0] - 1j * Ep2[0])
-    #     Ep[count] = (1 + cos(theta)) / 4 / pi / d * abs(Ep1[0])
-    #     count += 1
-    ##########################
-
-    ##########################
-    # Hansen implementation
-    d = 0.075 * ffmin
-    for deg in delta:
-        # theta = np.arctan(xbarR / (d * ffmin))
-        # u = np.sin(theta)
-        theta = deg * pi / 180
-        phi = 0
-        # R = (xbar**2 + d**2)**(1/2)
-        R = d / cos(theta)  # / ffmin
-        nabla = 120 * pi
-
-        # u = k * radius * np.sin(theta)
-
-        #######################
-        # o = k * xbar**2 / d
-
-        # def fun1(x): return(
-        #     1
-        #     * np.exp(1j * k * x**2 / 2 / d)
-        #     * np.exp(-1j * k * x * u)
-        # )
-        # def fun1(x): return (
-        #     1
-        #     * scipy.special.iv(0, pi * H * (1 - x**2))
-        #     # * scipy.special.jv(0, u * x)
-        #     * np.cos(k * (o / 2) * x**2 * (1 - u**2))
-        #     * np.cos(k * u * x)
-        # )j
-        # Ep[count] = 13.14 * (1 - np.cos(np.pi / 8 / d))
-        #######################
-
-        ##############################
-        # def R(x,y): return(
-        #     ((xbarR - (x * cos(y)))**2 + (-x * sin(y))**2 + d**2)**1/2
-        # )
-
-        # def fun1(x,y): return(
-        #     1
-        #     * scipy.special.iv(0, pi * H * (1 - x**2))
-        #     * (1 / R(x,y))
-        #     * cos(k * R(x,y))
-        # )
-        # Ep1 = integrate.dblquad(fun1, 0, radius, lambda x: 0, lambda x: 2 * pi)
-
-        # def fun2(x,y): return(
-        #     1
-        #     * scipy.special.iv(0, pi * H * (1 - x**2))
-        #     * (1 / R(x,y))
-        #     * sin(k * R(x,y))
-        # )
-        # Ep2 = integrate.dblquad(fun2, 0, radius, lambda x: 0, lambda x: 2 * pi)
-
-        # Ep[count] = (1 / lamda) * abs(Ep1[0] - 1j * Ep2[0])**2
-        ############################
-
-        #######################
-        summation = 0
-        even = 0
-        odd = 0
-        # print(k)
-        # print(radius)
-        # print(H)
-
-        # print("{} of {}".format(count, len(delta)), end="\r")
-        for N in range(50):
-
-            def fun_b1(x):
-                return (
-                    1
-                    # * scipy.special.iv(0, pi * H * (1 - x**2)**(1 / 2))
-                    * scipy.special.spherical_jn(N, x)
-                    * x
-                )
-
-            B1 = scipy.integrate.romberg(fun_b1, 0, k * radius, divmax=20)
-
-            def fun_b2(x):
-                return (
-                    1
-                    # * scipy.special.iv(0, pi * H * (1 - x**2)**(1 / 2))
-                    * scipy.special.spherical_jn(N, x)
-                )
-
-            # B2 = scipy.integrate.romberg(fun_b2, 0, 1, divmax=20)
-            B2 = scipy.integrate.romberg(fun_b2, 0, k * radius, divmax=20)
-
-            if N % 2 == 0:
-
-                def fun_a1(x):
-                    return scipy.special.gegenbauer(N, 0)(sin(theta) * cos(x))
-
-                def fun_a2(x):
-                    return scipy.special.gegenbauer(N - 1, 1)(sin(theta) * cos(x))
-
-                def fun_a5(x):
-                    return (
-                        scipy.special.gegenbauer(N - 2, 2)(sin(theta) * cos(x))
-                        * cos(x) ** 2
-                    )
-
-                if N == 0:
-                    A1 = 0
-                    A2 = 0
-                    A5 = 0
-                    pass
-                elif N == 2:
-                    A1 = scipy.integrate.romberg(fun_a1, 0, pi / 2, divmax=20)
-                    A2 = scipy.integrate.romberg(fun_a2, 0, pi / 2, divmax=20)
-                    A5 = 0
-                else:
-                    A1 = scipy.integrate.romberg(fun_a1, 0, pi / 2, divmax=20)
-                    A2 = scipy.integrate.romberg(fun_a2, 0, pi / 2, divmax=20)
-                    A5 = scipy.integrate.romberg(fun_a5, 0, pi / 2, divmax=20)
-
-                even += (
-                    (2 * N + 1)
-                    # * scipy.special.spherical_yn(N, k * R)
-                    * scipy.special.hankel2(N, k * R)
-                    * (
-                        -A1 * B1
-                        + ((1 / k / R) * A2 * B2)
-                        - ((1 / k ** 2 / R ** 2) * A5 * B1)
-                    )
-                )
-            else:
-
-                def fun_a4(x):
-                    return scipy.special.gegenbauer(N - 2, 2)(
-                        sin(theta) * cos(x)
-                    ) * cos(x)
-
-                if N == 1:
-                    A4 = 0
-                else:
-                    A4 = scipy.integrate.romberg(fun_a4, 0, pi / 2, divmax=20)
-
-                odd += (
-                    (2 * N + 1)
-                    # * scipy.special.spherical_yn(N, k * R)
-                    * scipy.special.hankel2(N, k * R)
-                    * A4
-                    * B2
-                )
-        even = nabla * cos(theta) * cos(phi) / pi * even
-        odd = nabla * sin(theta) * cos(theta) * cos(phi) / pi / k / R * odd
-        # print(even)
-        # print(odd)
-        Ep[count] = abs(
-            np.real(even) + np.real(odd) + 1j * (np.imag(even) + np.imag(odd))
-        )
-        # print(Ep[count])
-
-        # def fun2(x): return (
-        #     1
-        #     * scipy.special.iv(0, pi * H * (1 - x**2))
-        #     # * scipy.special.jv(0, u * x)
-        #     * np.sin(k * (o / 2) * x**2 * (1 - u**2))
-        #     * np.sin(k * u * x)
-        # )
-        # Ep2 = 2 * scipy.integrate.romberg(fun2, 0, 1)
-        # Ep2 = sum(fun2(np.linspace(0, 1, 1000)))
-        # Ep[count] = abs(Ep1 - 1j * Ep2)
-        # Ep2 = np.exp(-1j * k * radius**2 * u**2 / 2 / d)
-
-        count += 1
-
-    Pcorr = Ep ** 2 / max(Ep) ** 2  # * ffpwrden
-
-    # Pcorr = (Ep**2 / Ep[-1]**2) * ffpwrden
-    # Pcorr = Ep
-
-    # fig, ax = plt.subplots()
-    # ax.semilogx(delta, Pcorr)
-    # ax.set_xlim([0.01, 1.0])
-    # ax.grid(True, which="both")
-    # ax.minorticks_on()
-    # ax.set_title("Near Field Corrections xbar: %s , slr: %s" % (xbar, side_lobe_ratio))
-    # ax.set_xlabel("Normalized On Axis Distance")
-    # ax.set_ylabel("Normalized On Axis Power Density")
-    # return fig, ax
-    return pd.DataFrame(dict(delta=delta, Pcorr=Pcorr))
 
 
 def delta_xbar_split(delta_xbar: tuple, parameters: dict):

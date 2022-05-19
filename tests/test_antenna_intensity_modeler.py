@@ -41,13 +41,16 @@ def test_parameters(get_params):
     fact = {
         "radius_meters": 2.4,
         "freq_mhz": 8400.0,
+        "lamda": 0.0357,
         "power_watts": 400.0,
         "efficiency": 0.62,
         "side_lobe_ratio": 20.0,
         "H": 0.4872,
-        "ffmin": 1290.24,
-        "ffpwrden": 2.1134,
-        "k": 175.929,
+        "ffmin": 1291.1332,
+        "ffpwrden": 2.1135,
+        "k": 176.0509,
+        "min_range": 12.2964,
+        "gain": 50.4409,
     }
     # np.testing.assert_allclose(params, fact, rtol=1e-3)
     assert compare_approximate(params, fact)
@@ -66,4 +69,4 @@ def test_hazard_plot_function():
     df = parabolic.hazard_plot(params, 10.0)
     rng = df.range.values
     positives = df.positives.values
-    np.testing.assert_allclose(rng[0:3], [1.29024, 2.58048, 3.87072], rtol=1e-5)
+    np.testing.assert_allclose(rng[0:3], [1.2911, 2.5822, 3.8733], rtol=1e-2)

@@ -3,23 +3,20 @@
 """Main module for parabolic reflector antennas."""
 
 import numpy as np
-import scipy as sp
 import scipy.special
 import scipy.optimize
 import scipy.integrate
 import matplotlib.pyplot as plt
 import pandas as pd
 from functools import partial
-from multiprocessing import Pool
 from typing import Union, Callable
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm import tqdm
-import itertools
 
 # from .helpers import Either, Left, Right
 from pymonad.tools import curry
 from pymonad.operators.either import Either, Left, Right
-from pymonad.operators.maybe import Maybe, Nothing, Just
+from pymonad.operators.maybe import Nothing, Just
 from pymonad.operators.list import ListMonad
 
 # Basic units
@@ -223,7 +220,7 @@ def _unpack(x):
 
 
 def near_field_corrections(
-    parameters: dict, xbar: float, resolution: int = 1000, use_light_pipes: bool = False
+    parameters: dict, xbar: float, resolution: int = 1000, verbose: bool = False
 ) -> np.array:
     """Near field corrections for parabolic dish.
 
@@ -271,10 +268,16 @@ def near_field_corrections(
     ffmin = parameters.get("ffmin")
 
     if min_range < 0.1 * ffmin:
-        my_func = lambda x: min_range - (10 ** x * ffmin)
+
+        def my_func(x):
+            return min_range - (10 ** x * ffmin)
+
         pow = scipy.optimize.newton(my_func, -2)
     else:
         pow = -2
+
+    if verbose:
+        pow
 
     delta = np.logspace(-2, 0, resolution)
 
@@ -322,13 +325,7 @@ def _get_normalized_power_tensor(
     xbars = np.arange(0, xbar_max, step)
 
     delta_xbars = np.dstack(np.meshgrid(delta, xbars)).reshape(-1, 2)
-    results = list(itertools.product(delta, xbars))
-    # results = ["{}, {}".format(xx, yy) for xx in delta for yy in xbars]
-    # reshaped = np.reshape(results, (len(xbars), len(delta)), order="C")
 
-    # test = list(itertools.product(delta, xbars))
-
-    chunksize = 100
     run_corrections_with_params = partial(_delta_xbar_split, parameters=parameters)
 
     def run(f, my_iter):
@@ -356,22 +353,13 @@ def _get_normalized_power_tensor(
     ff_val = Ep[-1].value
     Ep_monad = ListMonad(*Ep)
 
+    # Normalize each row of tensor to maximum level at far field
     power_norm = Ep_monad * _unpack * _normalize(ff_val)
 
-    reshaped = np.reshape(power_norm, (len(xbars), len(delta)), order="C")
-
-    # with ProcessPoolExecutor() as p:
-    #     # map each delta, xbars tuple to the run_with_params partial function
-    #     mtrx = np.array(
-    #         list(p.map(run_corrections_with_params, delta_xbars, chunksize=chunksize))
-    #     )
     # # Reshape the resulting flattened array into a 2-d tensor representing
     # # 2-d space from txr center to farfield and down to txr edge
-    # # mtrx_unpacked = [x.value for x in mtrx]
-    # mtrx_reshaped = np.reshape(mtrx, (len(xbars), len(delta)), order="F")
-    # return_val = mtrx_reshaped ** 2 / mtrx_reshaped[:, -1][:, np.newaxis] ** 2
+    reshaped = np.reshape(power_norm, (len(xbars), len(delta)), order="C")
 
-    # Normalize each row of tensor to maximum level at far field
     return reshaped
 
 
@@ -396,7 +384,8 @@ def hazard_plot(
         gain_boost (int): (optional) additional gain in dB to add to output power
 
     Returns:
-        pandas.DataFrame: dataframe containing a range column, a positive values column, and a negative values column
+        pandas.DataFrame: dataframe containing a range column, a positive values column,
+        and a negative values column
 
     Example:
         >>> from antenna_intensity_modeler import parabolic
@@ -423,10 +412,7 @@ def hazard_plot(
     ffpwrden = parameters.get("ffpwrden")
     ffmin = parameters.get("ffmin")
 
-    gain_boost = 10 ** (gain_boost_db / 10.0)
-    ffpwrden_boosted = gain_boost * ffpwrden
     delta = np.linspace(0.001, 1.0, num=density)  # Normalized farfield distances
-    xbar_density = (xbar_max + 0.01) / 0.01
 
     # Get the normalized power tensor
     mtrx_normalized = _get_normalized_power_tensor(
@@ -434,16 +420,16 @@ def hazard_plot(
     )
 
     # Subtract normalized limit from normalized power tensor
-    mtrx_limited = abs(mtrx_normalized - limit / ffpwrden)
+    mtrx_limited = mtrx_normalized - limit / ffpwrden
 
-    pause = True
     # find the index of the largest values less than zero
     # divide by xbar density to determine position
     mtrx_arg_max = np.argmax(
         np.where(mtrx_limited < 0, mtrx_limited, -np.inf), axis=0
     ) * (xbar_max / density * 10)
 
-    mtrx_arg_min = np.argmin(mtrx_limited, axis=0) * (xbar_max / density * 10)
+    # # Find the min value which will represent hazard location
+    # mtrx_arg_min = np.argmin(mtrx_limited, axis=0) * (xbar_max / density * 10)
 
     # mtrx_reduced = np.maximum.reduce(
     #     mtrx_limited, initial=-np.inf, where=[mtrx_limited < 0]
@@ -451,8 +437,8 @@ def hazard_plot(
     return pd.DataFrame(
         dict(
             range=delta * ffmin,
-            positives=mtrx_arg_min * radius_meters,
-            negatives=mtrx_arg_min * -radius_meters,
+            positives=mtrx_arg_max * radius_meters,
+            negatives=mtrx_arg_max * -radius_meters,
         )
     )
 
@@ -482,17 +468,12 @@ def _combined_hazard_plot(parameters, limit, density=1000):
     >>> fig, ax = hazard_plot(params, 10.0)
     """
     radius_meters = parameters.get("radius_meters")
-    freq_mhz = parameters.get("freq_mhz")
-    power_watts = parameters.get("power_watts")
-    efficiency = parameters.get("efficiency")
-    side_lobe_ratio = parameters.get("side_lobe_ratio")
-    H = parameters.get("H")
     ffmin = parameters.get("ffmin")
     ffpwrden = parameters.get("ffpwrden")
     k = parameters.get("k")
 
-    n = density
-    delta = np.linspace(1.0, 0.01, n)  # Normalized farfield distances
+    # n = density
+    # delta = np.linspace(1.0, 0.01, n)  # Normalized farfield distances
     # x = np.logspace(-5, 0, 100)  # Normalized farfield distances
     x = np.linspace(0, 1, 1000)  # Normalized to farfield distance
     y = np.arange(0, 16.1, 0.1)  # Normalized to radius
@@ -709,20 +690,6 @@ def _next_pow_2(x):
 
 if __name__ == "__main__":
 
-    params = parameters(2.4, 8400, 400.0, 0.62, 20.0)
-    limit = 10.0
-    df = hazard_plot(params, limit)
-    rng = df.range.values
-    positives = df.positives.values
-    negatives = df.negatives.values
-    fig, ax = plt.subplots()
-    ax.plot(rng, positives, rng, negatives)
-    ax.grid(True, which="both")
-    ax.minorticks_on()
-    ax.set_title("Hazard Plot with limit: %s w/m^2" % limit)
-    ax.set_xlabel("Distance From Antenna(m)")
-    ax.set_ylabel("Off Axis Distance (m)")
-
     freq = 44.5 * GHZ
     lamda = C / freq
     R = 6.5 * METER
@@ -765,4 +732,19 @@ if __name__ == "__main__":
     ax.set_title("Near Field Corrections xbar: {}, slr: {}".format(xbar, slr))
     ax.set_xlabel("Normalized On Axis Distance")
     ax.set_ylabel("Normalized On Axis Power Density")
+    plt.show()
+
+    params = parameters(2.4, 8400, 400.0, 0.62, 20.0)
+    limit = 10.0
+    df = hazard_plot(params, limit)
+    rng = df.range.values
+    positives = df.positives.values
+    negatives = df.negatives.values
+    fig, ax = plt.subplots()
+    ax.plot(rng, positives, rng, negatives)
+    ax.grid(True, which="both")
+    ax.minorticks_on()
+    ax.set_title("Hazard Plot with limit: %s w/m^2" % limit)
+    ax.set_xlabel("Distance From Antenna(m)")
+    ax.set_ylabel("Off Axis Distance (m)")
     plt.show()

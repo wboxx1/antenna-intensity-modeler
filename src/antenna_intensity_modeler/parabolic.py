@@ -48,8 +48,6 @@ def parameters(
     power_watts: float,
     efficiency: float,
     side_lobe_ratio: float,
-    a_value: float = None,
-    n_value: float = None,
     gain: float = None,
 ) -> dict:
     """Parameters for parabolic dish
@@ -64,6 +62,8 @@ def parameters(
         power_watts (float): output power of radio in watts.
         efficiency (float): efficiency of antenna.
         side_lobe_ratio (float): side lobe ratio of antenna.
+        gain (float, optional): the gain of the antenna.  If gain is not
+        provided, it will be calculated using efficiency.
 
     Returns:
         dict: parameter dictionary needed for parabolic functions.
@@ -126,9 +126,8 @@ def parameters(
         "ffmin": ffmin,
         "ffpwrden": ffpwrden,
         "k": k,
-        "a_value": a_value,
-        "n_value": n_value,
         "min_range": min_range,
+        "gain": gain,
     }
     return return_dict
 
@@ -307,12 +306,12 @@ def near_field_corrections(
     return power_norm
 
 
-def delta_xbar_split(delta_xbar: tuple, parameters: dict):
+def _delta_xbar_split(delta_xbar: tuple, parameters: dict):
     (d, xbar) = delta_xbar[0], delta_xbar[1]
     return _run_near_field_corrections(d, parameters, xbar, verbose=False)
 
 
-def get_normalized_power_tensor(
+def _get_normalized_power_tensor(
     parameters: dict, density: int = 1000, xbar_max: float = 1.0
 ) -> np.array:
     n = density
@@ -330,7 +329,7 @@ def get_normalized_power_tensor(
     # test = list(itertools.product(delta, xbars))
 
     chunksize = 100
-    run_corrections_with_params = partial(delta_xbar_split, parameters=parameters)
+    run_corrections_with_params = partial(_delta_xbar_split, parameters=parameters)
 
     def run(f, my_iter):
         iter_length = len(my_iter)
@@ -430,7 +429,7 @@ def hazard_plot(
     xbar_density = (xbar_max + 0.01) / 0.01
 
     # Get the normalized power tensor
-    mtrx_normalized = get_normalized_power_tensor(
+    mtrx_normalized = _get_normalized_power_tensor(
         parameters, density=density, xbar_max=xbar_max
     )
 
@@ -458,7 +457,7 @@ def hazard_plot(
     )
 
 
-def combined_hazard_plot(parameters, limit, density=1000):
+def _combined_hazard_plot(parameters, limit, density=1000):
     """Hazard plot for parabolic dish.
 
     Receives user input parameters and hazard limit

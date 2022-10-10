@@ -16,7 +16,7 @@ from tqdm import tqdm
 # from .helpers import Either, Left, Right
 from pymonad.tools import curry
 from pymonad.operators.either import Either, Left, Right
-from pymonad.operators.maybe import Nothing, Just
+from pymonad.operators.maybe import Nothing, Just, Maybe
 from pymonad.operators.list import ListMonad
 
 # Basic units
@@ -188,14 +188,24 @@ def _run_near_field_corrections(
 
     @curry(2)
     def final_reduction(x, y):
-        return (1.0 + np.cos(theta)) / d * abs(x - 1.0j * y)
+        if d == 0:
+            return Left("divide by zero encounted in reduction")
+            # raise Exception("d cannot be zero.")
+        else:
+            return (1.0 + np.cos(theta)) / d * abs(x - 1.0j * y)
 
     # return (1 + np.cos(theta)) / d * abs(Ep1_1 - 1j * Ep2_1)
+    # return Either.apply(final_reduction).to_arguments(Ep1, Ep2).then(_square)
     return (final_reduction << Ep1 & Ep2).then(_square)
 
 
 def _square(x):
-    return Just(x ** 2)
+    return x ** 2
+
+
+@curry(2)
+def _power(x, y):
+    return y ** x
 
 
 def _squared(x):
@@ -211,6 +221,14 @@ def _divide(x, y):
 def _normalize(y, x):
     if y == 0:
         return Nothing
+    else:
+        return x / y
+
+
+def _normalize_test(x, y):
+    if y == 0:
+        # return Nothing
+        raise Exception("Divide by zero encountered in _normalize.")
     else:
         return x / y
 
